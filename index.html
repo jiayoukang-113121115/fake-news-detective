@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🕵️ 假訊息小偵探任務站</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;900&family=Noto+Sans+TC:wght@700;900&display=swap');
+        body, html {
+            margin:0; padding:0; width:100%; min-height:100%;
+            font-family:'Nunito','Noto Sans TC',sans-serif;
+            color:#1e293b;
+            overflow-x:hidden;
+            background-color: #fef3c7;
+            background-image:
+                /* 大泡泡：粉色 */
+                radial-gradient(circle at 12% 18%, rgba(252,165,165,0.45) 0, rgba(252,165,165,0) 14%),
+                /* 大泡泡：天空藍 */
+                radial-gradient(circle at 88% 22%, rgba(147,197,253,0.5) 0, rgba(147,197,253,0) 16%),
+                /* 大泡泡：薄荷綠 */
+                radial-gradient(circle at 8% 78%, rgba(134,239,172,0.45) 0, rgba(134,239,172,0) 15%),
+                /* 大泡泡：紫色 */
+                radial-gradient(circle at 92% 82%, rgba(196,181,253,0.5) 0, rgba(196,181,253,0) 17%),
+                /* 中央暖光 */
+                radial-gradient(circle at 50% 50%, rgba(254,240,138,0.35) 0, rgba(254,240,138,0) 40%),
+                /* 整體底色漸層 */
+                linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #dbeafe 100%);
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        /* 兒童風格：圓點點紋路裝飾 */
+        body::before {
+            content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+            background-image:
+                radial-gradient(circle, rgba(251,146,60,0.18) 2px, transparent 3px),
+                radial-gradient(circle, rgba(168,85,247,0.15) 2px, transparent 3px);
+            background-size: 60px 60px, 90px 90px;
+            background-position: 0 0, 30px 30px;
+        }
+        .global-hidden { display:none !important; }
+        #bg-decorations { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; overflow:hidden; }
+        .bg-icon { position:absolute; opacity:0.55; animation:gentleFloat 8s infinite ease-in-out alternate; pointer-events:none; filter:drop-shadow(2px 4px 6px rgba(0,0,0,0.08)); }
+        @keyframes gentleFloat {
+            0%{transform:translateY(0px) rotate(-8deg) scale(1);}
+            50%{transform:translateY(-25px) rotate(0deg) scale(1.08);}
+            100%{transform:translateY(-10px) rotate(8deg) scale(1.05);}
+        }
+        .back-to-hub-btn { position:fixed; top:15px; left:15px; z-index:9000; background:white; border:4px solid #1e293b; border-radius:99px; padding:8px 20px; font-weight:900; font-size:1.1rem; color:#1e293b; box-shadow:4px 4px 0 #1e293b; cursor:pointer; transition:all 0.1s; display:flex; align-items:center; gap:6px; }
+        .back-to-hub-btn:active { transform:translate(4px,4px); box-shadow:0 0 0 #1e293b; }
+
+        /* ===== 首頁 ===== */
+        #main-hub { position:relative; width:100%; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; z-index:50; }
+        .book-container { display:flex; flex-direction:column; gap:30px; width:100%; max-width:900px; justify-content:center; align-items:stretch; flex-wrap:wrap; }
+        @media(min-width:768px){ .book-container{flex-direction:row;} }
+        .book-card { flex:1; min-width:280px; border-radius:30px; padding:40px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; position:relative; overflow:hidden; transition:transform 0.2s,box-shadow 0.2s; background-color:white; }
+        .book-card:hover { transform:translateY(-10px); }
+        .book-card:active { transform:translateY(0); }
+        .book-spine { position:absolute; top:0; left:0; width:35px; height:100%; box-shadow:inset -5px 0 10px rgba(0,0,0,0.1); }
+        .book1-style { border:8px solid #eab308; box-shadow:10px 10px 0px #a16207; }
+        .book1-style:hover { box-shadow:14px 14px 0px #a16207; }
+        .book1-style .book-spine { background-color:#fef08a; border-right:4px solid #ca8a04; }
+        .book2-style { border:8px solid #22c55e; box-shadow:10px 10px 0px #15803d; }
+        .book2-style:hover { box-shadow:14px 14px 0px #15803d; }
+        .book2-style .book-spine { background-color:#bbf7d0; border-right:4px solid #16a34a; }
+
+
+
+        /* ===== 遊戲共用 ===== */
+        .hud-panel { background:white; border:4px solid #1e293b; border-radius:20px; box-shadow:4px 4px 0px #1e293b; padding:10px 20px; font-size:1.2rem; font-weight:900; color:#334155; display:flex; align-items:center; gap:8px; }
+        .popup-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.8); backdrop-filter:blur(4px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+        .popup-box { background:white; border:6px solid #1e293b; border-radius:35px; padding:30px; width:100%; max-width:600px; text-align:left; box-shadow:10px 10px 0px #1e293b; margin:auto; }
+        .rank-card { border:4px solid #1e293b; border-radius:20px; box-shadow:6px 6px 0px #1e293b; padding:20px; text-align:center; margin-bottom:20px; }
+
+        /* ===== 教學彈窗 ===== */
+        .tutorial-overlay { position:fixed; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(6px); z-index:2000; display:flex; align-items:center; justify-content:center; padding:20px; }
+        .tutorial-box { background:white; border:8px solid #1e293b; border-radius:40px; padding:36px 30px; width:100%; max-width:480px; text-align:center; box-shadow:12px 12px 0px #1e293b; }
+        .tutorial-page { display:none; flex-direction:column; align-items:center; }
+        .tutorial-page.active { display:flex; }
+        .tutorial-big-icon { font-size:5rem; margin-bottom:16px; line-height:1; }
+        .tutorial-title { font-size:2rem; font-weight:900; margin-bottom:12px; color:#1e293b; }
+        .tutorial-desc { font-size:1.3rem; font-weight:700; line-height:1.6; color:#334155; margin-bottom:24px; }
+        .tutorial-dot-row { display:flex; gap:8px; justify-content:center; margin-bottom:24px; }
+        .tutorial-dot { width:12px; height:12px; border-radius:50%; background:#cbd5e1; border:2px solid #94a3b8; }
+        .tutorial-dot.active { background:#3b82f6; border-color:#1e293b; }
+        .tutorial-btn { background:#3b82f6; border:4px solid #1e293b; border-radius:99px; padding:14px 32px; font-size:1.3rem; font-weight:900; color:white; box-shadow:5px 5px 0 #1e293b; cursor:pointer; transition:all 0.1s; width:100%; }
+        .tutorial-btn:active { transform:translate(5px,5px); box-shadow:0 0 0 #1e293b; }
+        .tutorial-btn.green { background:#22c55e; }
+
+        /* ===== 前冊 ===== */
+        #game1-wrapper { position:relative; width:100%; min-height:100vh; padding-bottom:40px; z-index:50; }
+        #b1-main-card { background:white; border:6px solid #1e293b; border-radius:30px; box-shadow:10px 10px 0px #1e293b; width:92%; max-width:500px; margin:0 auto 20px auto; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 30px; position:relative; transition:transform 0.1s, border-color 0.1s; }
+        /* 新功能D改版：HUD 難度指示燈改成星星等級，避免誤認為血量 */
+        .stage-star { font-size:1.3rem; transition:all 0.3s; color:#cbd5e1; }
+        .stage-star.lit { color:#fbbf24; text-shadow:0 0 6px rgba(251,191,36,0.8); }
+        /* 修改二：血量扣除動畫 */
+        @keyframes hpLose {
+            0%,100% { transform:scale(1); }
+            50%     { transform:scale(1.5); filter:brightness(1.8); }
+        }
+        .hp-lose { animation:hpLose 0.45s ease-out; }
+        .b1-card-emoji { font-size:5rem; margin-bottom:10px; text-shadow:2px 2px 0px rgba(0,0,0,0.1); line-height:1; }
+        .b1-card-text { font-size:1.5rem; font-weight:900; line-height:1.5; text-align:center; color:#1e293b; }
+        #b1-combo-anim { position:absolute; top:-40px; left:50%; transform:translateX(-50%) scale(0); opacity:0; background:#fde047; border:4px solid #1e293b; border-radius:16px; padding:5px 15px; font-weight:900; font-size:1.2rem; color:#1e293b; box-shadow:4px 4px 0 #1e293b; z-index:100; white-space:nowrap; pointer-events:none; }
+        @keyframes popBounce { 0%{transform:translate(-50%,20px) scale(0.5);opacity:0;} 20%{transform:translate(-50%,-10px) scale(1.1);opacity:1;} 30%{transform:translate(-50%,0px) scale(1);opacity:1;} 80%{transform:translate(-50%,0px) scale(1);opacity:1;} 100%{transform:translate(-50%,-20px) scale(0.8);opacity:0;} }
+        @keyframes cardBounce {
+            0%{transform:scale(1) rotate(0deg);border-color:#1e293b;}
+            20%{transform:scale(0.88) rotate(-3deg);}
+            45%{transform:scale(1.15) rotate(4deg);border-color:#22c55e;}
+            70%{transform:scale(0.96) rotate(-2deg);}
+            100%{transform:scale(1) rotate(0deg);border-color:#1e293b;}
+        }
+        .b1-card-bounce { animation:cardBounce 0.45s ease-out; }
+        .b1-action-btn { flex:1; border-radius:24px; border:5px solid #1e293b; padding:15px; font-weight:900; color:#1e293b; box-shadow:5px 5px 0px #1e293b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; transition:all 0.1s; background:white; }
+        .b1-action-btn:active { transform:translate(5px,5px); box-shadow:0px 0px 0px #1e293b; }
+
+        /* ===== 後冊 ===== */
+        .g23-app-container { width:100%; max-width:1100px; min-height:calc(100vh - 80px); background-color:#FFFFFF; position:relative; overflow:hidden; display:flex; flex-direction:column; box-shadow:8px 8px 0px #1e293b; border:5px solid #1e293b; border-radius:20px; color:#334155; margin:0 auto; }
+        .g23-status-bar { display:none; }
+        .g23-view { display:none; flex-direction:column; width:100%; flex:1; overflow-y:auto; }
+        .g23-view.active { display:flex; }
+        .g23-btn { color:white; border:4px solid #1e293b; padding:16px 20px; font-size:1.2rem; font-weight:bold; border-radius:30px; cursor:pointer; transition:all 0.1s; width:90%; max-width:320px; margin:0 auto; box-shadow:4px 4px 0 #1e293b; display:block; text-align:center; }
+        .g23-btn:active { transform:translate(4px,4px); box-shadow:0 0 0 #1e293b; }
+        .chat-header { color:white; padding:18px 28px; display:flex; justify-content:space-between; align-items:center; border-bottom:4px solid #1e293b; z-index:10; font-size:1.1rem; }
+        /* 後冊暫停遮罩 */
+        .b2-pause-mask { position:absolute; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:500; cursor:pointer; border-radius:30px; }
+        .b2-pause-label { background:white; border:6px solid #1e293b; border-radius:24px; padding:24px 36px; font-size:2rem; font-weight:900; color:#1e293b; box-shadow:8px 8px 0 #1e293b; text-align:center; }
+        /* 對方正在輸入動畫 */
+        .typing-bubble { padding:14px 22px !important; min-width:60px; }
+        .typing-dots { display:inline-flex; gap:4px; align-items:center; }
+        .typing-dots span {
+            display:inline-block; font-size:1.5rem; line-height:0.6; color:#64748b;
+            animation:typingBounce 1.2s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay:0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay:0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform:translateY(0); opacity:0.4; }
+            30% { transform:translateY(-6px); opacity:1; }
+        }
+        /* 修正四：正確答案 badge pulse 動畫 */
+        @keyframes catBadgePulse {
+            0%, 100% { transform:scale(1); }
+            25%      { transform:scale(1.15); }
+            50%      { transform:scale(1); }
+            75%      { transform:scale(1.15); }
+        }
+        .cat-badge-pulse { animation:catBadgePulse 1.2s ease-in-out; }
+        /* 完美達成勳章光暈 */
+        .perfect-medal-glow {
+            background:linear-gradient(135deg, #fde047 0%, #fbbf24 50%, #f59e0b 100%);
+            color:#7c2d12;
+            animation:medalGlow 2s ease-in-out infinite;
+        }
+        @keyframes medalGlow {
+            0%, 100% { transform:scale(1); box-shadow:6px 6px 0 #a16207, 0 0 0 rgba(250,204,21,0); }
+            50% { transform:scale(1.05); box-shadow:6px 6px 0 #a16207, 0 0 30px rgba(250,204,21,0.7); }
+        }
+        /* 優化三：後冊答對/答錯閃光遮罩 */
+        .flash-overlay {
+            position:absolute; inset:0; border-radius:30px;
+            pointer-events:none; z-index:100;
+            animation:flashFade 0.45s ease-out forwards;
+        }
+        @keyframes flashFade {
+            0%   { opacity:1; }
+            100% { opacity:0; }
+        }
+        /* 優化一：中場驚喜橫幅 */
+        #b1-midpoint-banner {
+            position:fixed;
+            top:50%; left:50%;
+            transform:translate(-50%, -50%) scale(0);
+            background:#fde047; border:5px solid #1e293b; border-radius:24px;
+            padding:20px 36px; font-size:2rem; font-weight:900; color:#1e293b;
+            box-shadow:8px 8px 0 #1e293b; z-index:9000; white-space:nowrap;
+            pointer-events:none; opacity:0;
+            text-align:center; line-height:1.4;
+        }
+        @keyframes popUpDown {
+            0%   { transform:translate(-50%,-50%) scale(0);   opacity:0; }
+            20%  { transform:translate(-50%,-50%) scale(1.1); opacity:1; }
+            30%  { transform:translate(-50%,-50%) scale(1.0); opacity:1; }
+            75%  { transform:translate(-50%,-50%) scale(1.0); opacity:1; }
+            100% { transform:translate(-50%,-50%) scale(0.8); opacity:0; }
+        }
+        .banner-show { animation: popUpDown 1.8s ease-in-out forwards; }
+        .chat-body {
+            flex:1;
+            background-color:#fffbeb;
+            background-image: radial-gradient(circle, #fde68a 1px, transparent 1px);
+            background-size: 24px 24px;
+            padding:28px 40px;
+            overflow-y:auto;
+            display:flex;
+            flex-direction:column;
+            gap:18px;
+            scroll-behavior:smooth;
+            max-height:calc(100vh - 200px);
+        }
+        .msg-row { display:flex; max-width:100%; gap:10px; margin-bottom:5px; }
+        .msg-left { align-self:flex-start; justify-content:flex-start; }
+        .msg-right { align-self:flex-end; justify-content:flex-end; flex-direction:row-reverse; }
+        .avatar { width:45px; height:45px; border-radius:50%; background-color:#cbd5e1; border:2px solid #1e293b; display:flex; justify-content:center; align-items:center; font-size:22px; flex-shrink:0; }
+        .msg-content { display:flex; flex-direction:column; max-width:80%; }
+        .msg-right .msg-content { align-items:flex-end; }
+        .sender-name { font-size:13px; color:#64748b; margin-bottom:4px; font-weight:bold; }
+        .msg-bubble { max-width:600px; padding:14px 22px; border-radius:20px; font-size:1.1rem; font-weight:bold; line-height:1.6; word-wrap:break-word; border:3px solid #1e293b; text-align:left; }
+        .msg-left .msg-bubble { background-color:white; border-top-left-radius:4px; box-shadow:3px 3px 0 #1e293b; }
+        .msg-right .msg-bubble { background-color:#e0f2fe; border-top-right-radius:4px; box-shadow:-3px 3px 0 #1e293b; }
+        .options-area { background-color:white; padding:20px; border-top:4px solid #1e293b; display:flex; flex-direction:column; gap:12px; z-index:10; }
+        .option-btn { background-color:white; border:4px solid #1e293b; color:#334155; padding:15px; font-size:1.1rem; font-weight:bold; border-radius:16px; cursor:pointer; text-align:left; transition:all 0.1s; box-shadow:4px 4px 0 #1e293b; }
+        .option-btn:active { transform:translate(4px,4px); box-shadow:0 0 0 #1e293b; }
+        @keyframes slideUp { from{transform:translateY(10px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+        .b2-review-card { background:white; border:4px solid #1e293b; border-radius:16px; padding:16px; box-shadow:4px 4px 0 #1e293b; }
+        .b2-system-prompt { text-align:center; font-size:0.9rem; font-weight:bold; color:#64748b; margin:8px auto; background-color:#e2e8f0; border-radius:99px; padding:4px 12px; width:fit-content; display:block; }
+
+        /* 最高分標籤 */
+        .best-score-badge { display:inline-block; background:#fef9c3; border:3px solid #ca8a04; border-radius:99px; padding:4px 14px; font-size:0.95rem; font-weight:900; color:#78350f; box-shadow:3px 3px 0 #a16207; margin-bottom:10px; }
+        .best-score-badge.perfect { background:#fde047; border-color:#a16207; color:#1e293b; }
+        .new-record-badge { display:inline-block; background:#fde047; border:3px solid #1e293b; border-radius:99px; padding:4px 16px; font-size:1rem; font-weight:900; color:#1e293b; box-shadow:3px 3px 0 #1e293b; margin-bottom:12px; animation:popBounce 0.5s ease-out forwards; }
+
+        /* 累計積分橫幅 */
+        #hub-total-score-banner { width:auto; max-width:900px; margin-top:16px; background:white; border:4px solid #1e293b; border-radius:99px; box-shadow:4px 4px 0 #1e293b; padding:10px 24px; display:inline-flex; align-items:center; gap:10px; justify-content:center; text-align:center; }
+
+        /* 煙火 */
+        @keyframes firework-fly { 0%{transform:translate(0,0) scale(1);opacity:1;} 100%{transform:translate(var(--fx),var(--fy)) scale(0);opacity:0;} }
+        .firework-dot { position:fixed; width:14px; height:14px; border-radius:50%; pointer-events:none; z-index:99999; animation:firework-fly 1.6s ease-out forwards; }
+
+        /* b2 correct/wrong feedback card */
+        .b2-correct { background-color:#d1fae5; border-color:#059669; }
+        .b2-wrong { background-color:#fee2e2; border-color:#dc2626; }
+
+        #game2-wrapper .back-to-hub-btn { top:calc(env(safe-area-inset-top, 0px) + 10px); left:10px; }
+        /* ===== 【修正1】手機 ≤600px 適配規則 =====
+           原本 @media 的閉合括號在第237行就提前結束，導致下方8條規則成為全域 CSS
+           （電腦版的 b1-card-text 被強制縮字、tutorial-box 也被壓縮）。
+           修正：把所有手機專屬規則移回 @media(max-width:600px) 內，
+           並刪除原第246行的孤兒右括號，使 CSS 大括號達到 open=close。        */
+        @media(max-width:600px){
+            #game2-wrapper .back-to-hub-btn { top:8px; left:8px; padding:5px 12px; font-size:0.9rem; border-width:3px; box-shadow:3px 3px 0 #1e293b; }
+            .b1-card-text{font-size:1.3rem;}
+            .b1-action-btn{padding:10px;}
+            .popup-box{padding:20px;}
+            /* 手機版返回鈕位置 */
+            .back-to-hub-btn{top:45px;left:10px;border-width:3px;font-size:1rem;padding:5px 15px;}
+            .tutorial-box{padding:24px 18px;}
+            .tutorial-title{font-size:1.6rem;}
+            .tutorial-desc{font-size:1.1rem;}
+        }
+
+        /* ===== 後冊背景動畫 ===== */
+        @keyframes kidsBgShift {
+            0%{background-position:0% 50%;}
+            50%{background-position:100% 50%;}
+            100%{background-position:0% 50%;}
+        }
+        #game2-wrapper::before {
+            content:'🌟 ⭐ 🎮 🛡️ 🔍 🌈 ✨ 🎯 💫 🌟';
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            display:flex; align-items:flex-start; justify-content:space-around;
+            font-size:2rem; opacity:0.15; pointer-events:none; z-index:0;
+            padding-top:20px; letter-spacing:10px; flex-wrap:wrap;
+            word-spacing:40px; line-height:3;
+        }
+        /* ===== 書本翻開 hover 效果 (優化9) ===== */
+        .book-card { transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s; }
+        .book-card:hover { transform:rotate(2deg) translateY(-8px) !important; }
+        .book-card:hover::after { content:''; position:absolute; top:6px; right:-12px; width:20px; height:95%; background:rgba(0,0,0,0.08); border-radius:0 8px 8px 0; transform:skewY(-1deg); pointer-events:none; }
+        .book-card:active { transform:rotate(0deg) translateY(0) !important; }
+
+        /* ===== 答題特效 ===== */
+        /* 答對：星星爆炸 */
+        .star-particle {
+            position:fixed; pointer-events:none; z-index:8998;
+            font-size:2rem; line-height:1;
+            animation: starFly 1.0s ease-out forwards;
+        }
+        @keyframes starFly {
+            0%   { transform:translate(0,0) scale(1) rotate(0deg); opacity:1; }
+            100% { transform:translate(var(--sx),var(--sy)) scale(0) rotate(var(--sr)); opacity:0; }
+        }
+        /* 答對：全螢幕綠色閃光 */
+        /* 【修正6】0.50 → 0.30：降低飽和度，避免綠色蓋住紅色「危險訊息」按鈕，
+           讓小一學童在選了紅色按鈕答對時，不會因閃光顏色混淆而誤解「對/錯」語意 */
+        .screen-flash-correct {
+            position:fixed; inset:0; background:rgba(34,197,94,0.30);
+            pointer-events:none; z-index:8997;
+            animation:screenFlashCorrect 0.7s ease-out forwards;
+        }
+        /* 答錯：全螢幕紅色閃光 */
+        /* 【修正6】0.55 → 0.30：同理，避免紅色閃光蓋住綠色「可信訊息」按鈕 */
+        .screen-flash-wrong {
+            position:fixed; inset:0; background:rgba(239,68,68,0.30);
+            pointer-events:none; z-index:8997;
+            animation:screenFlashWrong 0.7s ease-out forwards;
+        }
+        /* 超時：全螢幕灰色閃光 */
+        .screen-flash-timeout {
+            position:fixed; inset:0; background:rgba(100,116,139,0.50);
+            pointer-events:none; z-index:8997;
+            animation:screenFlash 0.9s ease-out forwards;
+        }
+        @keyframes screenFlashCorrect {
+            0%   { opacity:1; }
+            /* 【修正6】keyframe 峰值也同步從 0.6 降至 0.40，保持動畫漸層協調 */
+            30%  { opacity:0.9; background:rgba(34,197,94,0.40); }
+            100% { opacity:0; }
+        }
+        @keyframes screenFlashWrong {
+            0%,10% { opacity:1; }
+            20%    { opacity:0.6; }
+            40%    { opacity:1; }
+            100%   { opacity:0; }
+        }
+        @keyframes screenFlash {
+            0%   { opacity:1; }
+            100% { opacity:0; }
+        }
+        /* 答錯：卡片搖晃 */
+        @keyframes cardShake {
+            0%,100% { transform:translateX(0) rotate(0deg); }
+            15%     { transform:translateX(-10px) rotate(-3deg); }
+            30%     { transform:translateX(10px)  rotate(3deg); }
+            45%     { transform:translateX(-8px)  rotate(-2deg); }
+            60%     { transform:translateX(8px)   rotate(2deg); }
+            75%     { transform:translateX(-4px)  rotate(-1deg); }
+        }
+        .b1-card-shake { animation:cardShake 0.5s ease-out; }
+        /* 超時：鐘錶爆炸特效（多個元素） */
+        .timeout-clock {
+            position:fixed; left:50%; top:50%;
+            transform:translate(-50%,-50%) scale(0);
+            font-size:9rem; pointer-events:none; z-index:8999;
+            animation:clockExplode 1.3s ease-out forwards;
+        }
+        @keyframes clockExplode {
+            0%   { transform:translate(-50%,-50%) scale(0) rotate(-30deg); opacity:0; }
+            20%  { transform:translate(-50%,-50%) scale(1.4) rotate(10deg); opacity:1; }
+            45%  { transform:translate(-50%,-50%) scale(1.1) rotate(-5deg); opacity:1; }
+            75%  { transform:translate(-50%,-50%) scale(1.0) rotate(0deg);  opacity:1; }
+            100% { transform:translate(-50%,-50%) scale(1.8) rotate(5deg);  opacity:0; }
+        }
+        /* 超時：震動卡片 */
+        @keyframes cardTimeout {
+            0%,100% { transform:translateX(0); }
+            10%     { transform:translateX(-15px) rotate(-4deg); }
+            25%     { transform:translateX(15px)  rotate(4deg); }
+            40%     { transform:translateX(-12px) rotate(-3deg); }
+            55%     { transform:translateX(12px)  rotate(3deg); }
+            70%     { transform:translateX(-6px)  rotate(-1deg); }
+            85%     { transform:translateX(6px)   rotate(1deg); }
+        }
+        .b1-card-timeout { animation:cardTimeout 0.7s ease-out; }
+        /* 超時：散落的 X 符號 */
+        .timeout-x {
+            position:fixed; pointer-events:none; z-index:8998;
+            font-size:2.5rem; line-height:1; color:#ef4444;
+            animation:timeoutXFly 1.0s ease-out forwards;
+        }
+        @keyframes timeoutXFly {
+            0%   { transform:translate(0,0) scale(0.5) rotate(0deg); opacity:0; }
+            20%  { opacity:1; }
+            100% { transform:translate(var(--tx),var(--ty)) scale(0.2) rotate(var(--tr)); opacity:0; }
+        }
+        /* 後冊答對浮字 */
+        .b2-float-text {
+            position:absolute; left:50%; top:30%;
+            transform:translateX(-50%);
+            font-size:2rem; font-weight:900; pointer-events:none; z-index:200;
+            white-space:nowrap;
+            animation:floatUp 1.0s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0%   { transform:translateX(-50%) translateY(0)   scale(0.5); opacity:0; }
+            20%  { transform:translateX(-50%) translateY(0)   scale(1.2); opacity:1; }
+            80%  { transform:translateX(-50%) translateY(-40px) scale(1);   opacity:1; }
+            100% { transform:translateX(-50%) translateY(-60px) scale(0.8); opacity:0; }
+        }
+        @keyframes glowGreen { 0%{box-shadow:10px 10px 0px #1e293b;} 30%{box-shadow:0 0 30px 10px #22c55e, 10px 10px 0px #1e293b;} 100%{box-shadow:10px 10px 0px #1e293b;} }
+        @keyframes glowRed   { 0%{box-shadow:10px 10px 0px #1e293b;} 30%{box-shadow:0 0 30px 10px #ef4444, 10px 10px 0px #1e293b;} 100%{box-shadow:10px 10px 0px #1e293b;} }
+        .b1-glow-correct { animation:glowGreen 0.5s ease-out; }
+        .b1-glow-wrong   { animation:glowRed   0.5s ease-out; }
+
+        /* ===== 完美偵探標籤 (優化11) ===== */
+        @keyframes goldPulse { 0%,100%{box-shadow:0 0 8px 2px #fbbf24;opacity:1;} 50%{box-shadow:0 0 20px 8px #fde047;opacity:0.85;} }
+        .perfect-badge { display:inline-block; background:linear-gradient(135deg,#fde047,#f59e0b); border:4px solid #1e293b; border-radius:99px; padding:8px 24px; font-size:1.2rem; font-weight:900; color:#1e293b; margin-bottom:12px; animation:goldPulse 1.2s ease-in-out infinite, popBounce 0.6s ease-out; }
+
+        /* ===== 計時器秒數 (優化13) ===== */
+        #b1-timer-secs { font-size:1.1rem; font-weight:900; color:#334155; min-width:28px; text-align:right; transition:color 0.2s; }
+        #b1-timer-secs.urgent { font-size:1.6rem; color:#ef4444; animation:urgentPulse 0.5s ease-in-out infinite; }
+        @keyframes urgentPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
+
+        /* ===== 暫停按鈕 (優化6) ===== */
+        #b1-pause-btn { background:white; border:4px solid #1e293b; border-radius:99px; padding:8px 18px; font-weight:900; font-size:1rem; color:#1e293b; box-shadow:4px 4px 0 #1e293b; cursor:pointer; transition:all 0.1s; display:flex; align-items:center; gap:5px; }
+        #b1-pause-btn:active { transform:translate(4px,4px); box-shadow:0 0 0 #1e293b; }
+        .paused-overlay { position:absolute; inset:0; background:rgba(15,23,42,0.7); display:flex; align-items:center; justify-content:center; z-index:200; border-radius:30px; }
+        .paused-label { background:white; border:6px solid #1e293b; border-radius:24px; padding:20px 40px; font-size:2.5rem; font-weight:900; color:#1e293b; box-shadow:8px 8px 0 #1e293b; }
+
+        /* ===== 難度標籤 (優化5) ===== */
+        .b2-difficulty-badge { display:inline-block; background:#fef9c3; border:3px solid #ca8a04; border-radius:99px; padding:3px 12px; font-size:0.8rem; font-weight:900; color:#78350f; box-shadow:2px 2px 0 #a16207; margin-bottom:8px; align-self:flex-start; }
+
+        /* ===== 判斷線索視覺提示 (優化1) ===== */
+        /* 修正三：後冊結算成績橫幅 */
+        .b2-result-banner {
+            border:5px solid #1e293b; border-radius:20px;
+            padding:16px 20px; text-align:center;
+            font-size:1.4rem; font-weight:900; color:#1e293b;
+            box-shadow:6px 6px 0 #1e293b; margin-bottom:16px; width:100%;
+        }
+        .b2-result-banner.gold  { background:#fde047; animation:resultPulse 1.4s ease-in-out 3; }
+        .b2-result-banner.green { background:#bbf7d0; }
+        .b2-result-banner.blue  { background:#bfdbfe; }
+        .b2-result-banner.amber { background:#fed7aa; }
+        @keyframes resultPulse {
+            0%,100%{ transform:scale(1); }
+            50%    { transform:scale(1.05); }
+        }
+        .b1-clue-box { border-radius:16px; padding:12px 16px; margin-bottom:16px; border-width:4px; border-style:solid; }
+        .b1-clue-box.danger  { background:#fee2e2; border-color:#ef4444; }
+        .b1-clue-box.suspicious { background:#fef9c3; border-color:#eab308; }
+        .b1-clue-box.credible { background:#d1fae5; border-color:#22c55e; }
+        .b1-clue-tag { display:inline-block; border-radius:99px; padding:2px 10px; font-size:0.85rem; font-weight:900; margin:3px 3px 3px 0; border:2px solid currentColor; }
+        .b1-clue-tag.d { background:#fca5a5; color:#991b1b; }
+        .b1-clue-tag.s { background:#fde68a; color:#78350f; }
+        .b1-clue-tag.c { background:#bbf7d0; color:#14532d; }
+
+
+
+
+    </style>
+</head>
+<body>
+
+<div id="bg-decorations"></div>
+
+<!-- 設定按鈕 -->
+<button onclick="window.openSettings()" aria-label="開啟遊戲設定" class="fixed top-4 right-4 z-[9999] bg-white border-4 border-slate-800 rounded-full w-14 h-14 flex items-center justify-center text-3xl shadow-[4px_4px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all cursor-pointer">⚙️</button>
+<div id="settings-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[10000] hidden flex-col items-center justify-center p-4">
+    <div class="bg-white border-8 border-slate-800 rounded-3xl p-8 max-w-sm w-full text-center shadow-[10px_10px_0_#1e293b] relative">
+        <button onclick="window.closeSettings()" class="absolute top-2 right-4 text-3xl font-black text-slate-500 hover:text-rose-500 cursor-pointer">✕</button>
+        <h2 class="text-3xl font-black text-slate-800 mb-6">⚙️ 遊戲設定</h2>
+        <div class="mb-6 text-left">
+            <label class="block text-xl font-bold text-slate-700 mb-4">🎵 音樂與音效大小</label>
+            <input type="range" id="volume-slider" min="0" max="100" value="50" class="w-full h-4 bg-slate-200 rounded-lg appearance-none cursor-pointer" oninput="window.SharedAudio.setVolume(this.value); window.updateMuteBtnUI();">
+        </div>
+        <!-- 功能一：答題時間設定 -->
+        <div class="mb-6 text-left">
+            <label class="block text-xl font-bold text-slate-700 mb-2">⏱️ 前測答題時間</label>
+            <div class="flex items-center gap-3">
+                <input type="range" id="timer-slider" min="15" max="45" step="5" value="30"
+                    class="flex-1 h-4 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="window.onTimerSliderInput(this.value)">
+                <span id="timer-display" class="text-2xl font-black text-blue-600 min-w-[56px]">30秒</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-400 font-bold mt-1 px-1">
+                <span>15秒</span><span>30秒</span><span>45秒</span>
+            </div>
+            <!-- 新功能四：時間建議標示 -->
+            <div id="timer-advice" class="text-sm font-bold text-green-600 mt-2">✅ 適合國小一、二年級！</div>
+        </div>
+        <div class="flex gap-4">
+            <button id="mute-btn" onclick="window.toggleMuteUI()" class="flex-1 bg-slate-300 border-4 border-slate-800 rounded-xl py-4 font-black text-slate-800 text-lg shadow-[4px_4px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all">🔇 靜音中</button>
+            <button onclick="window.closeSettings()" class="flex-1 bg-emerald-400 border-4 border-slate-800 rounded-xl py-4 font-black text-slate-800 text-lg shadow-[4px_4px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all">✅ 確定</button>
+        </div>
+        <!-- 修正二：重置教學按鈕 -->
+        <div class="mt-4">
+            <button onclick="window.resetTutorial()" class="w-full bg-slate-200 hover:bg-slate-300 border-2 border-slate-500 rounded-xl py-2 px-4 font-bold text-slate-700 text-sm transition-all">🔄 重新看前測教學</button>
+            <div id="reset-tutorial-toast" class="mt-2 text-center text-emerald-700 font-bold text-sm" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 教學彈窗 ===== -->
+<div id="b1-tutorial-overlay" class="tutorial-overlay global-hidden">
+    <div class="tutorial-box relative">
+        <!-- 跳過按鈕 -->
+        <button onclick="window.tutFinish()" class="absolute top-2 right-3 text-base font-bold text-slate-400 hover:text-slate-700 cursor-pointer z-10" aria-label="跳過教學">跳過 ✕</button>
+        <!-- 第1頁 -->
+        <div class="tutorial-page active" id="tut-page-1">
+            <div class="tutorial-big-icon">🛑</div>
+            <div class="tutorial-title" style="color:#dc2626;">危險訊息！</div>
+            <div class="tutorial-desc">看到要密碼、要點奇怪連結<br>要先付錢的訊息⋯<br><strong>不能點、不能填、不轉傳！</strong></div>
+            <div class="tutorial-dot-row"><div class="tutorial-dot active"></div><div class="tutorial-dot"></div><div class="tutorial-dot"></div></div>
+            <button class="tutorial-btn" onclick="window.tutNext(2)">下一頁 ➡️</button>
+        </div>
+        <!-- 第2頁 -->
+        <div class="tutorial-page" id="tut-page-2">
+            <div class="tutorial-big-icon">🔍</div>
+            <div class="tutorial-title" style="color:#ca8a04;">可疑訊息！</div>
+            <div class="tutorial-desc">看起來怪怪的、<br>沒有說從哪裡來的訊息⋯<br><strong>先停下來想一想，<br>找出哪裡怪怪的！</strong></div>
+            <div class="tutorial-dot-row"><div class="tutorial-dot"></div><div class="tutorial-dot active"></div><div class="tutorial-dot"></div></div>
+            <button class="tutorial-btn" onclick="window.tutNext(3)">下一頁 ➡️</button>
+        </div>
+        <!-- 第3頁 -->
+        <div class="tutorial-page" id="tut-page-3">
+            <div class="tutorial-big-icon">✅</div>
+            <div class="tutorial-title" style="color:#16a34a;">可信訊息！</div>
+            <div class="tutorial-desc">學校、政府、爸媽親自<br>告訴你的正式通知⋯<br><strong>這種可以放心相信！</strong></div>
+            <div class="tutorial-dot-row"><div class="tutorial-dot"></div><div class="tutorial-dot"></div><div class="tutorial-dot active"></div></div>
+            <button class="tutorial-btn green" onclick="window.tutFinish()">我懂了！開始玩！ 🕵️</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 首頁 ===== -->
+<div id="main-hub">
+    <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-slate-800 mb-4 text-center tracking-wide drop-shadow-md">🕵️ 假訊息小偵探任務站</h1>
+
+    <!-- 優化八：當前等級徽章 -->
+    <div id="hub-level-badge" class="mb-4 inline-block px-5 py-2 rounded-full border-4 border-slate-800 bg-white font-black text-base shadow-[4px_4px_0_#1e293b]">
+        🌱 初心偵探
+    </div>
+
+    <div class="book-container px-4 mt-2">
+        <div class="book-card book1-style group" onclick="window.openGame1()" aria-label="開始前測遊戲">
+            <div class="book-spine"></div>
+            <div class="text-[4rem] md:text-[5rem] mb-4 relative z-10 group-hover:scale-110 transition duration-300">📖</div>
+            <h2 class="text-3xl md:text-4xl font-black text-yellow-800 mb-4 relative z-10">前測</h2>
+            <p class="text-slate-700 font-bold mb-3 relative z-10 text-lg">分類卡片挑戰！<br>練習判斷危險與可疑訊息。</p>
+            <div id="hub-b1-best" class="relative z-10 mb-2"></div>
+            <button class="bg-yellow-400 text-slate-900 font-black text-base px-5 py-2 rounded-full border-4 border-slate-800 shadow-[4px_4px_0_#1e293b] group-active:shadow-none group-active:translate-y-1 transition-all relative z-10" style="margin-top:auto;" aria-label="開始前測">開始前測 →</button>
+        </div>
+        <div class="book-card book2-style group" onclick="window.openGame2()" aria-label="開始後測遊戲">
+            <div class="book-spine"></div>
+            <div class="text-[4rem] md:text-[5rem] mb-4 relative z-10 group-hover:scale-110 transition duration-300">📗</div>
+            <h2 class="text-3xl md:text-4xl font-black text-green-800 mb-4 relative z-10">後測</h2>
+            <p class="text-slate-700 font-bold mb-3 relative z-10 text-lg">群組回應實戰！<br>學會在聊天中做出安全選擇。</p>
+            <div id="hub-b2-best" class="relative z-10 mb-2"></div>
+            <button class="bg-green-500 text-white font-black text-base px-5 py-2 rounded-full border-4 border-slate-800 shadow-[4px_4px_0_#1e293b] group-active:shadow-none group-active:translate-y-1 transition-all relative z-10" style="margin-top:auto;" aria-label="開始後測">開始後測 →</button>
+        </div>
+    </div>
+
+    <div id="hub-total-score-banner" class="px-4">
+        <div class="text-2xl">🏆</div>
+        <div class="text-base font-black text-slate-700">累計積分：</div>
+        <div id="hub-total-score-pts" class="text-2xl font-black text-slate-400">0<span class="text-sm">/20</span></div>
+        <div id="hub-total-score-text" class="text-sm font-bold text-slate-400 hidden"></div>
+        <!-- 新功能B：已玩次數，讓孩子和老師看到進度 -->
+        <span id="hub-play-count" class="text-sm font-bold text-slate-400">🎮 已玩 0 次</span>
+    </div>
+</div>
+
+<!-- ===== 前冊 ===== -->
+<div id="game1-wrapper" class="global-hidden relative w-full min-h-screen pb-10 z-50">
+    <button onclick="window.backToHub()" class="back-to-hub-btn" aria-label="返回主選單"><span>←</span> 回首頁</button>
+    <div id="b1-game-container" class="relative w-full h-full flex flex-col items-center">
+        <div id="b1-hud" class="w-full p-4 mt-16 flex justify-center items-center gap-4 flex-wrap z-40 global-hidden">
+            <!-- 修改二：血量顯示，放最左邊讓孩子隨時看到 -->
+            <div class="hud-panel" id="b1-hp-panel">
+                <span id="b1-hp-display">❤️❤️❤️</span>
+            </div>
+            <div class="hud-panel"><span class="text-2xl">🎯</span> 進度: <span id="b1-hud-progress" class="text-blue-600">1/10</span></div>
+            <div class="hud-panel bg-yellow-50"><span class="text-2xl">🔥</span> 連勝: <span id="b1-hud-combo" class="text-orange-600">0</span></div>
+            <!-- 修改一：難度指示燈改成星星等級，清楚標示「難度」二字避免誤認為血量 -->
+            <div class="hud-panel" id="b1-stage-light" title="難度等級">
+                <span style="font-size:0.9rem;font-weight:900;color:#94a3b8;">難度</span>
+                <span id="b1-light-1" class="stage-star">☆</span>
+                <span id="b1-light-2" class="stage-star">☆</span>
+                <span id="b1-light-3" class="stage-star">☆</span>
+            </div>
+            <!-- 【修正G】暫停按鈕原本只有 id 沒有 class，外觀是預設無樣式文字；
+                 補上與 HUD 面板相符的 class，確保視覺一致性 -->
+            <button id="b1-pause-btn" aria-label="暫停或繼續計時器" onclick="window.AppGame1.togglePause()" class="bg-white border-4 border-slate-800 rounded-full px-5 py-2 font-black text-base text-slate-800 shadow-[4px_4px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2 cursor-pointer">⏸ 暫停</button>
+        </div>
+        <div id="b1-screen-game" class="w-full flex-1 flex flex-col items-center justify-center global-hidden px-4 pb-8 relative">
+            <div class="w-full max-w-[500px] flex items-center gap-3 mb-4">
+                <div class="flex-1 h-4 bg-slate-200 rounded-full overflow-hidden border-2 border-slate-700 shadow-inner">
+                    <div id="b1-timer-fill" class="h-full bg-green-500 w-full transition-all duration-100 ease-linear"></div>
+                </div>
+                <span id="b1-timer-secs" aria-live="polite">30</span>
+            </div>
+            <div id="b1-main-card" class="relative">
+                <div id="b1-combo-anim"></div>
+                <!-- 優化九：朗讀按鈕 -->
+                <button id="b1-speak-btn" onclick="window.AppGame1.speakQuestion()" aria-label="朗讀題目" class="absolute top-3 right-3 bg-white border-3 border-slate-800 rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-[3px_3px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all cursor-pointer hover:bg-blue-100 z-10" style="border:3px solid #1e293b;">🔊</button>
+                <div id="b1-card-icon" class="b1-card-emoji">📱</div>
+                <img id="b1-card-img" alt="題目圖片"
+                    style="display:none;width:100%;max-height:180px;object-fit:cover;border-radius:16px;border:4px solid #1e293b;margin-bottom:12px;"
+                    onerror="this.style.display='none'; document.getElementById('b1-card-icon').style.display=''; document.getElementById('b1-img-fallback').style.display='block';">
+                <!-- 修正四：圖片載入失敗時顯示的提示 -->
+                <div id="b1-img-fallback" style="display:none;font-size:0.85rem;color:#94a3b8;font-weight:bold;margin-top:4px;margin-bottom:8px;">（圖片載入中，請稍候）</div>
+                <!-- 修改四：圖片題出現時顯示提示，引導孩子注意圖文關係 -->
+                <div id="b1-img-hint" style="display:none;" class="mb-2 bg-blue-50 border-2 border-blue-300 rounded-xl px-3 py-1 text-sm font-bold text-blue-700 text-center">🔍 仔細看圖片和文字，有沒有哪裡怪怪的？</div>
+                <div id="b1-card-text" class="b1-card-text">題目載入中...</div>
+            </div>
+            <div class="b1-btn-row w-full max-w-[800px] flex gap-3 md:gap-5 justify-center flex-col md:flex-row mt-4" style="transition:opacity 0.2s;">
+                <button class="b1-action-btn !bg-red-200 hover:!bg-red-300" aria-label="這是危險訊息" onclick="window.AppGame1.judgeAnswer('danger')">
+                    <div class="text-4xl mb-1">🛑</div>
+                    <div class="text-2xl font-black">危險訊息</div>
+                    <div class="text-sm font-bold text-red-900">不要點、不填、不轉傳</div>
+                </button>
+                <button class="b1-action-btn !bg-yellow-200 hover:!bg-yellow-300" aria-label="這是可疑訊息" onclick="window.AppGame1.judgeAnswer('suspicious')">
+                    <div class="text-4xl mb-1">🔍</div>
+                    <div class="text-2xl font-black">可疑訊息</div>
+                    <div class="text-sm font-bold text-yellow-900">先查證再決定</div>
+                </button>
+                <button class="b1-action-btn !bg-green-200 hover:!bg-green-300" aria-label="這是可信訊息" onclick="window.AppGame1.judgeAnswer('credible')">
+                    <div class="text-4xl mb-1">✅</div>
+                    <div class="text-2xl font-black">可信訊息</div>
+                    <div class="text-sm font-bold text-green-900">來源清楚、可信度較高</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 答題回饋彈窗 -->
+        <div id="b1-feedback-popup" class="popup-overlay global-hidden">
+            <div class="popup-box">
+                <h2 id="b1-feedback-title" class="text-4xl md:text-5xl font-black mb-4">結果</h2>
+                <div id="b1-feedback-category" class="text-2xl font-black mb-4 px-4 py-2 border-4 rounded-xl inline-block">分類</div>
+                <!-- 優化六：顯示原題目 -->
+                <!-- 【修正F】加入 b1-recap-img，讓圖片題在回饋彈窗也能看到照片，強化圖文對照學習效果 -->
+                <div class="bg-slate-100 border-2 border-slate-300 rounded-xl p-3 mb-3 flex items-start gap-3">
+                    <div id="b1-recap-icon" class="text-3xl flex-shrink-0">📱</div>
+                    <div class="flex-1">
+                        <div class="text-xs font-bold text-slate-500 mb-1">📋 剛才的題目：</div>
+                        <img id="b1-recap-img" alt="" style="display:none;width:100%;max-height:120px;object-fit:cover;border-radius:10px;border:3px solid #1e293b;margin-bottom:8px;">
+                        <div id="b1-recap-text" class="text-base font-bold text-slate-700"></div>
+                    </div>
+                </div>
+                <div class="text-xl font-bold text-slate-700 leading-relaxed mb-3"><strong>原因：</strong><br><span id="b1-feedback-reason">...</span></div>
+                <div id="b1-clue-panel" class="b1-clue-box mb-3">
+                    <div class="font-black text-base mb-2" id="b1-clue-title">🔑 判斷線索</div>
+                    <div id="b1-clue-tags"></div>
+                </div>
+                <div class="bg-indigo-50 border-4 border-indigo-200 rounded-xl p-4 text-lg font-bold text-indigo-800 mb-6"><strong>🕵️ 小偵探提醒：</strong><br><span id="b1-feedback-tip">...</span></div>
+                <button id="b1-next-question-btn" class="bg-blue-500 border-4 border-slate-800 rounded-full py-4 px-10 text-2xl font-black text-white shadow-[4px_4px_0px_#1e293b] active:translate-y-1 active:shadow-none w-full transition" onclick="window.AppGame1.nextQuestion()" aria-label="前往下一題">下一題 ➡️</button>
+            </div>
+        </div>
+
+        <!-- 結尾畫面 -->
+        <div id="b1-screen-end" class="popup-overlay !bg-slate-900/95 global-hidden overflow-y-auto">
+            <div class="bg-white border-8 border-slate-800 rounded-[40px] shadow-[10px_10px_0px_#1e293b] p-8 max-w-xl w-full my-auto flex flex-col items-center">
+                <!-- 修改二：血量用盡時顯示的失敗橫幅 -->
+                <div id="b1-gameover-banner" style="display:none;background:#fee2e2;border:4px solid #ef4444;border-radius:16px;padding:14px;text-align:center;font-size:1.3rem;font-weight:900;color:#b91c1c;margin-bottom:16px;width:100%;">
+                    💔 偵探能量用盡了！沒關係，再試一次！
+                </div>
+                <div id="b1-rank-card" class="rank-card w-full">
+                    <div id="b1-rank-emoji" class="text-6xl mb-2">🏅</div>
+                    <h2 id="b1-rank-title" class="text-3xl font-black text-slate-800 mb-1">等級名稱</h2>
+                    <p id="b1-rank-msg" class="text-lg font-bold text-slate-600">鼓勵的話</p>
+                </div>
+                <div id="b1-new-record-badge" class="w-full text-center mb-2" style="display:none;"><span class="new-record-badge">🆕 新紀錄！</span></div>
+                <div class="bg-slate-100 border-4 border-slate-300 rounded-3xl p-4 mb-6 flex justify-around w-full">
+                    <div class="text-center"><div class="text-sm font-bold text-slate-500">答對題數</div><div id="b1-end-correct" class="text-4xl font-black text-blue-600">0</div></div>
+                    <div class="text-center"><div class="text-sm font-bold text-slate-500">最高連勝</div><div id="b1-end-combo" class="text-4xl font-black text-orange-500">0</div></div>
+                </div>
+                <div id="b1-personal-summary" class="w-full mb-4"></div>
+                <!-- 新功能三：各類型答對統計卡片 -->
+                <div id="b1-type-stats" class="w-full mb-6"></div>
+                <div id="b1-retry-wrong-wrap" class="w-full mb-3" style="display:none;">
+                    <button onclick="window.AppGame1.retryWrong()" class="bg-rose-400 border-4 border-slate-800 rounded-full py-4 px-10 text-2xl font-black text-slate-800 shadow-[6px_6px_0px_#1e293b] active:translate-y-2 active:shadow-none transition-all w-full">🔁 只重做錯誤題目</button>
+                </div>
+                <button onclick="window.AppGame1._doStartGame()" class="bg-orange-400 border-4 border-slate-800 rounded-full py-4 px-10 text-2xl font-black text-slate-900 shadow-[6px_6px_0px_#1e293b] active:translate-y-2 active:shadow-none transition-all w-full mb-3">🔄 再挑戰一次</button>
+                <!-- 新功能A：複製成績給爸媽，延伸家庭互動學習 -->
+                <button id="b1-copy-score-btn" onclick="window.AppGame1.copyScore()" class="bg-sky-400 border-4 border-slate-800 rounded-full py-4 px-10 text-2xl font-black text-slate-900 shadow-[4px_4px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all w-full mb-3">📋 複製成績給爸媽！</button>
+                <!-- 修改三：引導玩家去玩後冊，增加跨冊遊玩率 -->
+                <button id="b1-goto-b2-btn" onclick="window.openGame2()" class="bg-green-400 border-4 border-slate-800 rounded-full py-4 px-10 text-2xl font-black text-slate-800 shadow-[4px_4px_0_#1e293b] active:translate-y-2 active:shadow-none transition-all w-full mb-3">📗 去試試後測！</button>
+                <button onclick="window.backToHub()" class="bg-slate-300 border-4 border-slate-800 rounded-full py-4 px-10 text-2xl font-black text-slate-800 shadow-[6px_6px_0px_#1e293b] active:translate-y-2 active:shadow-none transition-all w-full">返回任務站選單 🏠</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== 後冊 ===== -->
+<div id="game2-wrapper" class="global-hidden relative w-full min-h-screen pt-20 pb-8 px-6 z-50" style="background:linear-gradient(135deg,#f0fdf4 0%,#fffbeb 50%,#f0f9ff 100%);">
+    <button onclick="window.backToHub()" class="back-to-hub-btn"><span>←</span> 回首頁</button>
+    <div id="b2-app-container" class="g23-app-container">
+        <div class="g23-status-bar" style="background:#00b900;">
+            <span id="b2-clock">12:00</span>
+            <span>📶 4G 🔋 100%</span>
+        </div>
+        <div id="b2-chat-view" class="g23-view active">
+            <div class="chat-header" style="background:#06C755;">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl cursor-pointer" onclick="window.backToHub()">＜</span>
+                    <span class="text-lg font-bold" id="b2-ui-group-name">🏫 班級群組</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="b2-pause-btn" onclick="window.AppGame2.togglePause()" class="bg-white/20 hover:bg-white/40 px-4 py-2 rounded-full text-base font-bold cursor-pointer transition-all">⏸ 暫停</button>
+                    <button id="b2-speak-btn" onclick="window.AppGame2.speakScenario()" aria-label="朗讀題目" class="bg-white/20 hover:bg-white/40 px-3 py-2 rounded-full text-base font-bold cursor-pointer transition-all" title="朗讀題目">🔊</button>
+                    <div class="bg-white/20 px-3 py-1 rounded-full text-sm" id="b2-ui-progress">1 / 10</div>
+                </div>
+            </div>
+            <div class="chat-body" id="b2-chat-history"></div>
+            <div class="options-area" id="b2-options-area"></div>
+            <div style="display:none;" class="p-5 bg-white border-t-4 border-slate-800 flex-col animate-[slideUp_0.3s_ease-out]" id="b2-feedback-area">
+                <div class="p-5 rounded-2xl mb-4 text-left border-4" id="b2-feedback-card">
+                    <div class="text-xl font-bold mb-2" id="b2-feedback-title"></div>
+                    <div class="text-base text-slate-700 leading-relaxed mb-3" id="b2-feedback-text"></div>
+                    <div class="bg-yellow-50 border-2 border-dashed border-yellow-400 rounded-xl p-3 text-left">
+    <div class="text-sm text-slate-800 leading-relaxed font-bold" id="b2-detective-text"></div>
+                    </div>
+                </div>
+                <button class="g23-btn !bg-blue-500 !w-full" onclick="window.AppGame2.nextScenario()" id="b2-next-btn" aria-label="前往下一題">下一題</button>
+            </div>
+        </div>
+        <div id="b2-end-view" class="g23-view !bg-slate-50 p-6 text-center">
+            <!-- 修正三：成績橫幅 -->
+            <div id="b2-result-banner" class="b2-result-banner" style="display:none;"></div>
+            <div id="b2-perfect-badge-wrap" class="w-full text-center" style="display:none;"><span class="perfect-badge">🏆 完美偵探</span></div>
+            <div id="b2-rank-card" class="rank-card w-full mt-4">
+                <div id="b2-rank-emoji" class="text-6xl mb-2">🏅</div>
+                <h2 id="b2-rank-title" class="text-2xl font-black text-slate-800 mb-1">等級名稱</h2>
+                <p id="b2-rank-msg" class="text-base font-bold text-slate-600">鼓勵的話</p>
+            </div>
+            <div id="b2-new-record-badge" class="w-full text-center mb-2" style="display:none;"><span class="new-record-badge">🆕 新紀錄！</span></div>
+            <div class="flex justify-around bg-white p-4 border-4 border-slate-300 rounded-2xl mb-4 shadow-sm">
+                <div class="flex flex-col items-center"><span class="text-3xl font-black text-blue-500" id="b2-end-correct">0</span><span class="text-xs font-bold text-slate-500 mt-1">安全回應</span></div>
+                <div class="flex flex-col items-center"><span class="text-3xl font-black text-rose-500" id="b2-end-wrong">0</span><span class="text-xs font-bold text-slate-500 mt-1">危險回應</span></div>
+            </div>
+            <!-- 新功能C：平均思考時間 -->
+            <!-- 修改五：顯示答對率百分比，一目了然 -->
+            <div id="b2-accuracy" class="text-2xl font-black text-slate-700 mt-2 mb-1"></div>
+            <div id="b2-avg-time" class="text-sm font-bold text-slate-500 mt-1 mb-3"></div>
+            <div id="b2-review-section" class="text-left mb-4 w-full">
+                <div class="text-lg font-black text-slate-800 mb-3">📝 實戰檢討筆記</div>
+                <div id="b2-review-list" class="flex flex-col gap-3"></div>
+            </div>
+            <div class="bg-blue-50 border-4 border-blue-400 rounded-2xl p-5 text-left mb-4">
+                <h3 class="font-black text-blue-800 text-lg mb-3">🛡️ 遇到可疑訊息，可以去這裡查：</h3>
+                <ul class="text-sm font-bold text-slate-700 space-y-3">
+                    <li class="flex items-start gap-2"><span>✅</span><span><strong>台灣事實查核中心</strong><br><a href="https://www.factcheck.tw" target="_blank" rel="noopener" class="text-blue-600 underline font-bold">factcheck.tw →</a></span></li>
+                    <li class="flex items-start gap-2"><span>🏥</span><span><strong>衛生福利部官網</strong><br><a href="https://www.mohw.gov.tw" target="_blank" rel="noopener" class="text-blue-600 underline font-bold">mohw.gov.tw →</a></span></li>
+                    <li class="flex items-start gap-2"><span>🚓</span><span><strong>165 反詐騙官網</strong><br><a href="https://165.npa.gov.tw" target="_blank" rel="noopener" class="text-blue-600 underline font-bold">165.npa.gov.tw →</a></span></li>
+                </ul>
+            </div>
+            <button class="g23-btn !bg-orange-400 !text-slate-900 !w-full mb-3" onclick="window.AppGame2.startGame()">再挑戰一次 🔄</button>
+            <!-- 修改三：引導玩家去玩前冊，增加跨冊遊玩率 -->
+            <button class="g23-btn !bg-yellow-400 !text-slate-900 !w-full mb-3" onclick="window.openGame1()">📖 去練習前測！</button>
+            <button class="g23-btn !bg-emerald-500 !w-full mb-4" onclick="window.backToHub()">完成任務，回首頁</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== 背景裝飾（兒童風格繪本元素）=====
+(function(){
+    const bg=document.getElementById('bg-decorations');
+    // 更童趣的元素：氣球、糖果、彩虹、星星、火箭、雲、太陽、花、笑臉
+    const icons=['🎈','🍭','🌈','⭐','🚀','☁️','🌟','🌸','🎨','🦄','🎪','🍦','✨','🎀','🌻','🪁'];
+    // 分布在邊緣（不擋中間內容），但更均勻
+    const zones=[
+        {x1:2,x2:18,y1:5,y2:25},   // 左上
+        {x1:78,x2:95,y1:5,y2:25},  // 右上
+        {x1:2,x2:18,y1:40,y2:60},  // 左中
+        {x1:78,x2:95,y1:40,y2:60}, // 右中
+        {x1:2,x2:18,y1:72,y2:92},  // 左下
+        {x1:78,x2:95,y1:72,y2:92}  // 右下
+    ];
+    // 每個區塊放 3 個元素，總共 18 個
+    zones.forEach(z=>{
+        for(let i=0;i<3;i++){
+            const el=document.createElement('div'); el.className='bg-icon';
+            el.textContent=icons[Math.floor(Math.random()*icons.length)];
+            el.style.left=(z.x1+Math.random()*(z.x2-z.x1))+'vw';
+            el.style.top=(z.y1+Math.random()*(z.y2-z.y1))+'vh';
+            el.style.fontSize=(2.5+Math.random()*2.5)+'rem';
+            el.style.animationDelay=(Math.random()*3)+'s';
+            el.style.animationDuration=(6+Math.random()*4)+'s';
+            bg.appendChild(el);
+        }
+    });
+})();
+
+// ===== 音效系統 =====
+window.SharedAudio = {
+    ctx:null,masterGain:null,bgmGain:null,sfxGain:null,volume:0,isMuted:true,bgmInterval:null,
+    init:function(){ if(!this.ctx){ this.ctx=new(window.AudioContext||window.webkitAudioContext)(); this.masterGain=this.ctx.createGain(); this.bgmGain=this.ctx.createGain(); this.sfxGain=this.ctx.createGain(); this.bgmGain.connect(this.masterGain); this.sfxGain.connect(this.masterGain); this.masterGain.connect(this.ctx.destination); this.updateVolume(); } if(this.ctx.state==='suspended')this.ctx.resume(); },
+    updateVolume:function(){ if(this.masterGain)this.masterGain.gain.value=this.isMuted?0:this.volume; },
+    setVolume:function(val){
+        this.volume=val/100;
+        if(this.volume>0)this.isMuted=false;
+        this.updateVolume();
+        // 根據當前頁面決定播放哪種BGM
+        if(this.volume>0 && !this.isMuted){
+            const onHub = !document.getElementById('main-hub').classList.contains('global-hidden');
+            const inGame = !document.getElementById('game1-wrapper').classList.contains('global-hidden')
+                        || !document.getElementById('game2-wrapper').classList.contains('global-hidden');
+            if(onHub && !this.bgmInterval) this.startBGM();
+            else if(inGame && !this.gameBgmInterval) this.startGameBGM();
+        }
+    },
+    toggleMute:function(){
+        this.init();
+        this.isMuted=!this.isMuted;
+        if(!this.isMuted&&this.volume===0){this.volume=0.5;document.getElementById('volume-slider').value=50;}
+        this.updateVolume();
+        if(!this.isMuted && this.volume>0){
+            const onHub = !document.getElementById('main-hub').classList.contains('global-hidden');
+            const inGame = !document.getElementById('game1-wrapper').classList.contains('global-hidden')
+                        || !document.getElementById('game2-wrapper').classList.contains('global-hidden');
+            if(onHub && !this.bgmInterval) this.startBGM();
+            else if(inGame && !this.gameBgmInterval) this.startGameBGM();
+        } else {
+            this.stopAllBGM();
+        }
+        return this.isMuted;
+    },
+    playTone:function(freq,type,duration,vol,isBGM=false){ if(!this.ctx||this.isMuted||this.volume===0)return; try{ const osc=this.ctx.createOscillator(); const gain=this.ctx.createGain(); osc.type=type; osc.frequency.setValueAtTime(freq,this.ctx.currentTime); gain.gain.setValueAtTime(0,this.ctx.currentTime); gain.gain.linearRampToValueAtTime(vol,this.ctx.currentTime+0.01); gain.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+duration); osc.connect(gain); gain.connect(isBGM?this.bgmGain:this.sfxGain); osc.start(this.ctx.currentTime); osc.stop(this.ctx.currentTime+duration); }catch(e){} },
+    playSFX:function(type){
+        this.init();
+        if(type==='click') this.playTone(400,'sine',0.05,0.05);
+        else if(type==='correct'){
+            // ✅ 答對：明亮快速上行四音 + 底音增厚度，清脆有活力
+            this.playTone(261.63,'sine',0.18,0.15);   // C4 底音同步
+            this.playTone(523.25,'sine',0.14,0.12);   // C5
+            setTimeout(()=>this.playTone(659.25,'sine',0.16,0.14),80);  // E5
+            setTimeout(()=>this.playTone(783.99,'sine',0.18,0.16),160); // G5
+            setTimeout(()=>this.playTone(1046.50,'sine',0.40,0.30),260);// C6 高音長音收尾
+        }
+        else if(type==='wrong'){
+            // ❌ 答錯：重低音撞擊 + 下行三音，明確的「錯了」感
+            this.playTone(160,'sawtooth',0.30,0.10);  // 重擊低音
+            this.playTone(330,'triangle',0.22,0.10);  // 中音同步
+            setTimeout(()=>this.playTone(277,'triangle',0.28,0.16),140);// 下行
+            setTimeout(()=>this.playTone(207,'triangle',0.35,0.30),300);// 再下行長音
+        }
+        else if(type==='timeout'){
+            // ⏰ 超時：三聲急促警報 + 悲傷下行
+            this.playTone(880,'square',0.12,0.06);
+            setTimeout(()=>this.playTone(880,'square',0.12,0.06),120);
+            setTimeout(()=>this.playTone(880,'square',0.12,0.06),240);
+            setTimeout(()=>this.playTone(523.25,'triangle',0.26,0.16),420);
+            setTimeout(()=>this.playTone(466.16,'triangle',0.26,0.16),630);
+            setTimeout(()=>this.playTone(415.30,'triangle',0.30,0.18),860);
+            setTimeout(()=>this.playTone(349.23,'triangle',0.40,0.30),1100);
+            setTimeout(()=>this.playTone(174.61,'sine',0.45,0.12),1150);
+        }
+        else if(type==='complete'){
+            this.playTone(523.25,'sine',0.15,0.15);
+            setTimeout(()=>this.playTone(659.25,'sine',0.15,0.15),150);
+            setTimeout(()=>this.playTone(783.99,'sine',0.15,0.15),300);
+            setTimeout(()=>this.playTone(1046.50,'sine',0.4,0.15),450);
+        }
+        else if(type==='msg'){
+            // LINE 叮咚通知音
+            this.playTone(659.25,'sine',0.12,0.10);
+            setTimeout(()=>this.playTone(493.88,'sine',0.14,0.12),160);
+        }
+    },
+    startBGM:function(){
+        this.init();
+        this.stopGameBGM(); // 切換時先停掉緊張版
+        if(this.bgmInterval) return;
+        // 首頁旋律：輕快活潑的兒童風（Do Re Mi 風格）
+        const melody=[
+            523.25,659.25,783.99,1046.50,
+            783.99,659.25,523.25,0,
+            659.25,783.99,880,1046.50,
+            880,783.99,659.25,0
+        ];
+        let step=0;
+        this.bgmInterval=setInterval(()=>{
+            if(!this.isMuted&&this.volume>0&&melody[step%melody.length]>0)
+                this.playTone(melody[step%melody.length],'sine',0.18,0.03,true);
+            step++;
+        },280);
+    },
+    stopBGM:function(){ if(this.bgmInterval){clearInterval(this.bgmInterval);this.bgmInterval=null;} },
+
+    // ===== 遊戲中緊張配樂（動態加速版） =====
+    gameBgmInterval:null,
+    gameBgmTension:0,    // 0 ~ 1，由外部更新
+    gameBgmStep:0,
+    setGameTension:function(t){ this.gameBgmTension = Math.max(0, Math.min(1, t)); },
+    startGameBGM:function(){
+        this.init();
+        this.stopBGM();
+        if(this.gameBgmInterval) return;
+        this.gameBgmTension = 0;
+        this.gameBgmStep = 0;
+
+        // 低音 bassline（A 小調，偵探感）
+        const bassline=[
+            220.00, 0, 220.00, 0,
+            261.63, 0, 220.00, 0,
+            196.00, 0, 196.00, 0,
+            246.94, 0, 220.00, 0
+        ];
+        // 中音點綴
+        const accent=[
+            0,0,0,659.25,
+            0,0,0,0,
+            0,0,0,587.33,
+            0,0,0,0
+        ];
+
+        const self = this;
+        const scheduleNext = function(){
+            if(self.isMuted || self.volume===0){
+                self.gameBgmStep++;
+                self.gameBgmInterval = setTimeout(scheduleNext, 200);
+                return;
+            }
+            const step = self.gameBgmStep;
+            const T = self.gameBgmTension;  // 0~1
+            // 節奏：放鬆時 220ms，最緊張時 80ms
+            const tempo = 220 - (T * 140);
+
+            // 低音
+            if(bassline[step%16] > 0){
+                // 高緊張時音量更大
+                const vol = 0.05 + T * 0.05;
+                self.playTone(bassline[step%16], 'triangle', 0.15, vol, true);
+            }
+            // 點綴音
+            if(accent[step%16] > 0){
+                self.playTone(accent[step%16], 'sawtooth', 0.10, 0.025 + T*0.02, true);
+            }
+
+            // 高緊張度才有心跳音（每 4 拍一次）
+            if(T > 0.4 && step % 4 === 0){
+                self.playTone(80 + T*40, 'sine', 0.12, 0.04 + T*0.06, true);
+            }
+            // 極高緊張度（後 3 秒）加上警報音
+            if(T > 0.75 && step % 2 === 0){
+                self.playTone(1200, 'square', 0.05, 0.02, true);
+            }
+
+            self.gameBgmStep++;
+            self.gameBgmInterval = setTimeout(scheduleNext, tempo);
+        };
+        scheduleNext();
+    },
+    stopGameBGM:function(){
+        if(this.gameBgmInterval){ clearTimeout(this.gameBgmInterval); this.gameBgmInterval=null; }
+        this.gameBgmTension = 0;
+    },
+    stopAllBGM:function(){ this.stopBGM(); this.stopGameBGM(); }
+};
+
+// ===== 全域 UI =====
+window.openSettings=function(){
+    window.SharedAudio.init();
+    window.SharedAudio.playSFX('click');
+    // 同步計時器滑桿顯示
+    try{
+        const sec=(window.AppGame1&&window.AppGame1.maxSeconds)||parseInt(localStorage.getItem('detective_timer')||'30');
+        const sl=document.getElementById('timer-slider');
+        const dp=document.getElementById('timer-display');
+        const adv=document.getElementById('timer-advice');
+        if(sl)sl.value=sec;
+        if(dp)dp.textContent=sec+'秒';
+        // 新功能四：同步建議標示
+        if(adv){
+            if(sec<=20){ adv.textContent='⚡ 挑戰模式，只適合高年級！'; adv.className='text-sm font-bold text-red-600 mt-2'; }
+            else if(sec<=30){ adv.textContent='✅ 適合國小一、二年級！'; adv.className='text-sm font-bold text-green-600 mt-2'; }
+            else{ adv.textContent='😊 輕鬆模式，給剛入門的小朋友！'; adv.className='text-sm font-bold text-blue-600 mt-2'; }
+        }
+    }catch(e){}
+    // 暫停前冊計時器
+    if(window.AppGame1 && window.AppGame1.timerId){
+        clearInterval(window.AppGame1.timerId);
+        window.AppGame1.timerId=null;
+        window.AppGame1._wasTimerRunning=true;
+    }
+    // 停止所有遊戲 BGM（前冊+後冊）
+    if(window.SharedAudio.gameBgmInterval||window.SharedAudio.gameBgmInterval!==null){
+        window.SharedAudio.stopGameBGM();
+        window._settingsStoppedGameBGM=true;
+    }
+    document.getElementById('settings-modal').classList.remove('hidden');
+    document.getElementById('settings-modal').style.display='flex';
+    window.updateMuteBtnUI();
+};
+window.closeSettings=function(){
+    window.SharedAudio.playSFX('click');
+    document.getElementById('settings-modal').classList.add('hidden');
+    document.getElementById('settings-modal').style.display='none';
+    // 恢復前冊計時器
+    if(window.AppGame1 && window.AppGame1._wasTimerRunning){
+        window.AppGame1._wasTimerRunning=false;
+        const gameScreen=document.getElementById('b1-screen-game');
+        if(gameScreen && !gameScreen.classList.contains('global-hidden') && !window.AppGame1.isPaused){
+            window.AppGame1.timerId=setInterval(()=>{
+                window.AppGame1.timeLeft-=0.1;
+                window.AppGame1.updateTimerUI();
+                if(window.AppGame1.timeLeft<=0){
+                    clearInterval(window.AppGame1.timerId);
+                    window.AppGame1.judgeAnswer('timeout');
+                }
+            },100);
+        }
+    }
+    // 恢復 BGM（根據當前在哪個遊戲）
+    if(window._settingsStoppedGameBGM){
+        window._settingsStoppedGameBGM=false;
+        if(!window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+            const g1=document.getElementById('game1-wrapper');
+            const g2=document.getElementById('game2-wrapper');
+            const inGame1=g1 && !g1.classList.contains('global-hidden');
+            const inGame2=g2 && !g2.classList.contains('global-hidden');
+            const g1Paused=window.AppGame1 && window.AppGame1.isPaused;
+            const g2Paused=window.AppGame2 && window.AppGame2.isPaused;
+            if((inGame1 && !g1Paused) || (inGame2 && !g2Paused)){
+                window.SharedAudio.startGameBGM();
+                if(inGame2) window.SharedAudio.setGameTension(0.3);
+            }
+        }
+    }
+};
+window.toggleMuteUI=function(){ window.SharedAudio.toggleMute(); window.SharedAudio.playSFX('click'); window.updateMuteBtnUI(); };
+window.updateMuteBtnUI=function(){ const btn=document.getElementById('mute-btn'); if(window.SharedAudio.isMuted||window.SharedAudio.volume===0){btn.innerHTML='🔇 靜音中';btn.classList.add('bg-slate-300');btn.classList.remove('bg-yellow-400');document.getElementById('volume-slider').value=0;}else{btn.innerHTML='🔊 音樂開';btn.classList.add('bg-yellow-400');btn.classList.remove('bg-slate-300');document.getElementById('volume-slider').value=window.SharedAudio.volume*100;} };
+
+window.openGame1=function(){
+    window.SharedAudio.playSFX('click');
+    window.SharedAudio.stopAllBGM();
+    // 新功能B：累加遊玩次數
+    try{ let c=parseInt(localStorage.getItem('detective_play_count')||'0'); localStorage.setItem('detective_play_count',c+1); }catch(e){}
+    document.getElementById('main-hub').classList.add('global-hidden');
+    document.getElementById('game2-wrapper').classList.add('global-hidden');
+    document.getElementById('game1-wrapper').classList.remove('global-hidden');
+    window.AppGame1.startGame();
+    if(!window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+        setTimeout(()=>window.SharedAudio.startGameBGM(), 300);
+    }
+};
+window.openGame2=function(){
+    window.SharedAudio.stopAllBGM();
+    // 新功能B：累加遊玩次數
+    try{ let c=parseInt(localStorage.getItem('detective_play_count')||'0'); localStorage.setItem('detective_play_count',c+1); }catch(e){}
+    window.AppGame2.startGame();
+    if(!window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+        setTimeout(()=>{
+            window.SharedAudio.startGameBGM();
+            window.SharedAudio.setGameTension(0.3);
+        }, 300);
+    }
+};
+window.backToHub=function(){
+    window.SharedAudio.playSFX('click');
+    window.SharedAudio.stopAllBGM();
+    if(window.AppGame1)window.AppGame1.stopGame();
+    if(window.AppGame2)window.AppGame2.stopGame();
+    ['game1-wrapper','game2-wrapper'].forEach(id=>document.getElementById(id).classList.add('global-hidden'));
+    document.getElementById('main-hub').classList.remove('global-hidden');
+    updateHubBestScores();
+    // 回首頁後若音樂開著就重新播放輕鬆版BGM
+    if(!window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+        setTimeout(()=>window.SharedAudio.startBGM(), 300);
+    }
+};
+
+function shuffle(array){ let ci=array.length,ri; while(ci!=0){ri=Math.floor(Math.random()*ci);ci--;[array[ci],array[ri]]=[array[ri],array[ci]];} return array; }
+
+// ===== 鍵盤快速鍵 (優化4/6) =====
+document.addEventListener('keydown',function(e){
+    const g1Visible=!document.getElementById('game1-wrapper').classList.contains('global-hidden');
+    const feedbackOpen=g1Visible&&!document.getElementById('b1-feedback-popup').classList.contains('global-hidden');
+    if(feedbackOpen){if(e.code==='Enter'||e.code==='Space'){e.preventDefault();window.AppGame1.nextQuestion();}return;}
+    if(g1Visible){
+        if(e.code==='Digit1')window.AppGame1.judgeAnswer('danger');
+        else if(e.code==='Digit2')window.AppGame1.judgeAnswer('suspicious');
+        else if(e.code==='Digit3')window.AppGame1.judgeAnswer('credible');
+        else if(e.code==='Space'){e.preventDefault();window.AppGame1.togglePause();}
+    }
+});
+
+// ===== 教學彈窗邏輯 =====
+window.tutNext=function(page){ document.querySelectorAll('.tutorial-page').forEach(p=>p.classList.remove('active')); document.getElementById('tut-page-'+page).classList.add('active'); window.SharedAudio.playSFX('click'); };
+
+// 修改二：更新 HUD 血量顯示，有扣血時觸發動畫
+function updateHpDisplay(hp){
+    const el=document.getElementById('b1-hp-display');
+    if(!el)return;
+    let str='';
+    for(let i=0;i<3;i++){ str += i<hp ? '❤️' : '🖤'; }
+    el.textContent=str;
+    el.classList.remove('hp-lose'); void el.offsetWidth;
+    el.classList.add('hp-lose');
+    setTimeout(()=>el.classList.remove('hp-lose'),500);
+}
+
+// 修改一：難度指示燈改成星星等級（★☆）
+function updateStageLight(index){    const l1=document.getElementById('b1-light-1');
+    const l2=document.getElementById('b1-light-2');
+    const l3=document.getElementById('b1-light-3');
+    if(!l1)return;
+    // 亮起的顯示實心星 ★，未亮的顯示空心星 ☆
+    l1.textContent=index>=0?'★':'☆';
+    l2.textContent=index>=3?'★':'☆';
+    l3.textContent=index>=7?'★':'☆';
+    l1.className='stage-star'+(index>=0?' lit':'');
+    l2.className='stage-star'+(index>=3?' lit':'');
+    l3.className='stage-star'+(index>=7?' lit':'');
+}
+window.onTimerSliderInput=function(val){
+    const v=parseInt(val);
+    const dp=document.getElementById('timer-display');
+    if(dp)dp.textContent=v+'秒';
+    if(window.AppGame1) window.AppGame1.maxSeconds=v;
+    try{localStorage.setItem('detective_timer',v);}catch(e){}
+    const adv=document.getElementById('timer-advice');
+    if(adv){
+        if(v<=20){ adv.textContent='⚡ 挑戰模式，只適合高年級！'; adv.className='text-sm font-bold text-red-600 mt-2'; }
+        else if(v<=30){ adv.textContent='✅ 適合國小一、二年級！'; adv.className='text-sm font-bold text-green-600 mt-2'; }
+        else{ adv.textContent='😊 輕鬆模式，給剛入門的小朋友！'; adv.className='text-sm font-bold text-blue-600 mt-2'; }
+    }
+};
+window.tutFinish=function(){ try{localStorage.setItem('detective_tutorial_done','1');}catch(e){} document.getElementById('b1-tutorial-overlay').classList.add('global-hidden'); window.SharedAudio.playSFX('click'); window.AppGame1._doStartGame(); };
+
+// 修正二：重置教學
+window.resetTutorial=function(){
+    try{ localStorage.removeItem('detective_tutorial_done'); }catch(e){}
+    window.SharedAudio.playSFX('click');
+    const toast=document.getElementById('reset-tutorial-toast');
+    if(toast){
+        toast.textContent='✅ 下次進入前測時會重新顯示教學';
+        toast.style.display='block';
+        setTimeout(()=>{ toast.style.display='none'; toast.textContent=''; }, 1500);
+    }
+};
+
+// ===== localStorage 最高分 =====
+const LS_KEYS={b1:'detective_b1_best',b2:'detective_b2_best'};
+function getBest(book){ try{const v=localStorage.getItem(LS_KEYS[book]);return v!==null?parseInt(v,10):-1;}catch(e){return -1;} }
+function setBest(book,score){ try{localStorage.setItem(LS_KEYS[book],String(score));}catch(e){} }
+function renderBestBadge(elId,best){ const el=document.getElementById(elId); if(!el)return; if(best<0){el.innerHTML='<span class="text-sm font-bold text-slate-400">尚未挑戰</span>';return;} if(best===10){el.innerHTML='<span class="best-score-badge perfect">🌟 完美紀錄 10/10</span>';return;} el.innerHTML=`<span class="best-score-badge">最高：${best}/10 🏅</span>`; }
+function updateHubBestScores(){ renderBestBadge('hub-b1-best',getBest('b1')); renderBestBadge('hub-b2-best',getBest('b2')); updateTotalScoreBanner(); updateLevelBadge(); checkPerfectAchievement(); updatePlayCount(); }
+
+// ===== 【新增】近期出現過的題目不重複機制 =====
+// 設計說明：
+//   題庫共 48 題（前冊），每局抽 10 題。若不做任何記錄，同一題可能在連續
+//   兩局都出現，降低學習效果。
+//   做法：用 localStorage 記錄「最近 15 道出現過的題目文字」（題目文字作為唯一 key）。
+//   每局組 deck 前先過濾掉最近出現過的題目；若過濾後題數不足，才放回舊題補足。
+//   保留 15 題是因為 10 題一局、記 15 道可讓連續兩局完全不重複，第三局才可能再出現。
+const LS_RECENT_KEY = 'detective_b1_recent';
+const RECENT_MAX    = 15;   // 記憶窗口大小
+
+function getRecentTexts(){
+    try{
+        const v=localStorage.getItem(LS_RECENT_KEY);
+        return v ? JSON.parse(v) : [];
+    }catch(e){ return []; }
+}
+function saveRecentTexts(arr){
+    try{ localStorage.setItem(LS_RECENT_KEY, JSON.stringify(arr)); }catch(e){}
+}
+// 把本局出現的題目文字記入歷史，超過上限時刪除最舊的
+function recordRecentDeck(deck){
+    let recent = getRecentTexts();
+    deck.forEach(q=>{ recent.push(q.text); });
+    // 只保留最新的 RECENT_MAX 道
+    if(recent.length > RECENT_MAX) recent = recent.slice(recent.length - RECENT_MAX);
+    saveRecentTexts(recent);
+}
+// 從 pool 中剔除近期出現過的題目；若剩餘不足 minNeeded，把剔除的題目放回補足
+function filterRecentFromPool(pool, minNeeded){
+    const recent = new Set(getRecentTexts());
+    const fresh   = pool.filter(q => !recent.has(q.text));
+    const stale   = pool.filter(q =>  recent.has(q.text));
+    if(fresh.length >= minNeeded) return fresh;
+    // 不夠用：把舊題 shuffle 後補在後面
+    return [...fresh, ...shuffle(stale)];
+}
+
+// 新功能B：更新已玩次數顯示
+function updatePlayCount(){
+    const el=document.getElementById('hub-play-count');
+    if(!el)return;
+    try{
+        const c=parseInt(localStorage.getItem('detective_play_count')||'0');
+        el.textContent='🎮 已玩 '+c+' 次';
+    }catch(e){}
+}
+
+// 優化八：更新等級徽章
+function updateLevelBadge(){
+    const badge=document.getElementById('hub-level-badge');
+    if(!badge)return;
+    const b1=Math.max(0,getBest('b1')),b2=Math.max(0,getBest('b2')),total=b1+b2;
+    let text,bg;
+    if(total>=18){text='🦸 傳說偵探';bg='bg-gradient-to-r from-yellow-300 to-orange-300';}
+    else if(total>=14){text='🕵️ 超級偵探';bg='bg-blue-200';}
+    else if(total>=10){text='🔍 偵探新星';bg='bg-emerald-200';}
+    else if(total>=1){text='📚 練習中';bg='bg-amber-200';}
+    else {text='🌱 初心偵探';bg='bg-white';}
+    badge.textContent=text;
+    badge.className=`mb-4 inline-block px-5 py-2 rounded-full border-4 border-slate-800 font-black text-base shadow-[4px_4px_0_#1e293b] ${bg}`;
+}
+
+// 優化十一：完美達成偵探勳章
+function checkPerfectAchievement(){
+    const b1=getBest('b1'),b2=getBest('b2');
+    let medal=document.getElementById('hub-perfect-medal');
+    if(b1===10 && b2===10){
+        try{localStorage.setItem('detective_perfect','1');}catch(e){}
+        if(!medal){
+            medal=document.createElement('div');
+            medal.id='hub-perfect-medal';
+            medal.className='mb-4 inline-block px-6 py-3 rounded-full border-4 border-yellow-700 font-black text-lg shadow-[6px_6px_0_#a16207] perfect-medal-glow';
+            medal.innerHTML='🎖️ 偵探勳章 · 完美達成！';
+            const hub=document.getElementById('hub-level-badge');
+            hub.parentNode.insertBefore(medal,hub);
+        }
+    }
+}
+function updateTotalScoreBanner(){
+    const b1=getBest('b1'),b2=getBest('b2'),total=Math.max(0,b1)+Math.max(0,b2);
+    const ptsEl=document.getElementById('hub-total-score-pts');
+    if(!ptsEl)return;
+    const colors={18:'text-rose-500',14:'text-blue-500',10:'text-emerald-500',0:'text-amber-500'};
+    let cls='text-2xl font-black text-slate-400';
+    if(total>=18) cls='text-2xl font-black text-rose-500';
+    else if(total>=14) cls='text-2xl font-black text-blue-500';
+    else if(total>=10) cls='text-2xl font-black text-emerald-500';
+    else if(total>=1) cls='text-2xl font-black text-amber-500';
+    ptsEl.className=cls;
+    ptsEl.innerHTML=`${total}<span class="text-sm">/20</span>`;
+}
+function checkAndSaveBest(book,score){ const prev=getBest(book); if(score>prev){setBest(book,score);return true;} return false; }
+
+// ===== 煙火 =====
+function launchFireworks(){ const colors=['#fbbf24','#34d399','#60a5fa','#f87171','#a78bfa']; const cx=window.innerWidth/2,cy=window.innerHeight/2; for(let i=0;i<20;i++){ const dot=document.createElement('div'); dot.className='firework-dot'; const angle=Math.random()*Math.PI*2,dist=80+Math.random()*200; dot.style.cssText=`left:${cx-7}px;top:${cy-7}px;background:${colors[Math.floor(Math.random()*colors.length)]};--fx:${Math.round(Math.cos(angle)*dist)}px;--fy:${Math.round(Math.sin(angle)*dist)}px;animation-delay:${(Math.random()*0.3).toFixed(2)}s;`; document.body.appendChild(dot); setTimeout(()=>dot.remove(),2000); } }
+
+// ===== 答題特效函式 =====
+// 答對：星星從卡片爆出（更多、更大）+ 綠色全螢幕閃光
+function fxCorrect(originEl){
+    const flash=document.createElement('div');
+    flash.className='screen-flash-correct';
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),750);
+    // 星星爆炸 18 顆，更大更遠
+    const stars=['⭐','🌟','✨','💫','🎉','🎊','⚡'];
+    const rect=originEl?originEl.getBoundingClientRect():{top:window.innerHeight/2,left:window.innerWidth/2,width:0,height:0};
+    const cx=rect.left+rect.width/2;
+    const cy=rect.top+rect.height/2;
+    for(let i=0;i<18;i++){
+        const el=document.createElement('div');
+        el.className='star-particle';
+        el.textContent=stars[Math.floor(Math.random()*stars.length)];
+        const angle=(i/18)*Math.PI*2 + (Math.random()-0.5)*0.4;
+        const dist=100+Math.random()*180;
+        const rot=(Math.random()-0.5)*900;
+        const sz=1.5+Math.random()*1.8;
+        el.style.cssText=`left:${cx}px;top:${cy}px;font-size:${sz}rem;--sx:${Math.round(Math.cos(angle)*dist)}px;--sy:${Math.round(Math.sin(angle)*dist)}px;--sr:${Math.round(rot)}deg;animation-delay:${(Math.random()*0.12).toFixed(2)}s;`;
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),1100);
+    }
+}
+
+// 答錯：卡片強力搖晃 + 紅色全螢幕閃爍（閃兩次）
+function fxWrong(originEl){
+    const flash=document.createElement('div');
+    flash.className='screen-flash-wrong';
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),750);
+    // 卡片強力搖晃
+    if(originEl){
+        originEl.classList.remove('b1-card-shake'); void originEl.offsetWidth;
+        originEl.classList.add('b1-card-shake');
+        setTimeout(()=>originEl.classList.remove('b1-card-shake'),600);
+    }
+}
+
+// 超時：鐘錶中央彈出 + X符號四散 + 強力灰色閃光 + 卡片震動
+function fxTimeout(){
+    // 強力灰色閃光（更明顯）
+    const flash=document.createElement('div');
+    flash.className='screen-flash-timeout';
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),950);
+
+    // 超大鐘錶從中央爆出
+    const clock=document.createElement('div');
+    clock.className='timeout-clock';
+    clock.textContent='⏰';
+    document.body.appendChild(clock);
+    setTimeout(()=>clock.remove(),1400);
+
+    // X符號從中心四散
+    const cx=window.innerWidth/2, cy=window.innerHeight/2;
+    const xSymbols=['❌','✖️','💢','❌','✖️','❌'];
+    for(let i=0;i<6;i++){
+        const el=document.createElement('div');
+        el.className='timeout-x';
+        el.textContent=xSymbols[i];
+        const angle=(i/6)*Math.PI*2;
+        const dist=100+Math.random()*120;
+        const rot=(Math.random()-0.5)*360;
+        el.style.cssText=`left:${cx}px;top:${cy}px;--tx:${Math.round(Math.cos(angle)*dist)}px;--ty:${Math.round(Math.sin(angle)*dist)}px;--tr:${Math.round(rot)}deg;animation-delay:${(i*0.05).toFixed(2)}s;`;
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(),1200);
+    }
+
+    // 卡片強力震動
+    const card=document.getElementById('b1-main-card');
+    if(card){
+        card.classList.remove('b1-card-timeout'); void card.offsetWidth;
+        card.classList.add('b1-card-timeout');
+        setTimeout(()=>card.classList.remove('b1-card-timeout'),750);
+    }
+}
+
+// 後冊答對浮字
+function fxB2FloatText(text,color,container){
+    if(!container)return;
+    const el=document.createElement('div');
+    el.className='b2-float-text';
+    el.textContent=text;
+    el.style.color=color;
+    container.style.position='relative';
+    container.appendChild(el);
+    setTimeout(()=>el.remove(),1100);
+}
+
+// 優化一：縮小版煙火（5顆，集中上方）
+function launchMiniFireworks(){
+    const colors=['#fbbf24','#34d399','#60a5fa','#f87171','#a78bfa'];
+    const cx=window.innerWidth/2, cy=window.innerHeight*0.25;
+    for(let i=0;i<5;i++){
+        const dot=document.createElement('div'); dot.className='firework-dot';
+        const angle=Math.random()*Math.PI*2, dist=40+Math.random()*80;
+        dot.style.cssText=`left:${cx-7}px;top:${cy-7}px;background:${colors[Math.floor(Math.random()*colors.length)]};--fx:${Math.round(Math.cos(angle)*dist)}px;--fy:${Math.round(Math.sin(angle)*dist)}px;animation-delay:${(Math.random()*0.2).toFixed(2)}s;`;
+        document.body.appendChild(dot);
+        setTimeout(()=>dot.remove(),2000);
+    }
+}
+
+// 優化一：中場驚喜橫幅
+function showMidpointBanner(){
+    // 中場驚喜：包裝成通用的 showStageBanner 呼叫
+    showStageBanner('🎊 答對一半啦！<br>⭐ 你好棒！繼續加油！ ⭐', '#fde047', true);
+}
+
+// 新功能一：通用難度升級橫幅（text: 顯示文字, bgColor: 背景色, withFirework: 是否放小煙火）
+function showStageBanner(text, bgColor, withFirework){
+    let backdrop=document.getElementById('b1-midpoint-backdrop');
+    if(!backdrop){
+        backdrop=document.createElement('div');
+        backdrop.id='b1-midpoint-backdrop';
+        backdrop.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:8999;pointer-events:none;opacity:0;transition:opacity 0.2s;';
+        document.body.appendChild(backdrop);
+    }
+    backdrop.style.opacity='1';
+    setTimeout(()=>{ backdrop.style.opacity='0'; },1600);
+
+    let banner=document.getElementById('b1-midpoint-banner');
+    if(!banner){ banner=document.createElement('div'); banner.id='b1-midpoint-banner'; document.body.appendChild(banner); }
+    banner.innerHTML=text;
+    banner.style.background=bgColor||'#fde047';
+    banner.className='';
+    void banner.offsetWidth;
+    banner.className='banner-show';
+    if(withFirework) launchMiniFireworks();
+    setTimeout(()=>{ banner.className=''; banner.style.background=''; },1800);
+}
+
+// ===== 偵探等級 =====
+function getDetectiveRank(score){ if(score===10)return{rank:"假訊息終結者",emoji:"🏅",msg:"太神啦！你根本是假訊息剋星！",colorClass:"text-rose-500",bgClass:"bg-rose-50"}; if(score>=8)return{rank:"資深小偵探",emoji:"🕵️",msg:"超厲害！幾乎沒有訊息能騙過你！",colorClass:"text-blue-600",bgClass:"bg-blue-50"}; if(score>=6)return{rank:"偵探新星",emoji:"🔍",msg:"做得很棒！繼續保持查證好習慣喔！",colorClass:"text-emerald-500",bgClass:"bg-emerald-50"}; if(score>=4)return{rank:"見習偵探",emoji:"📚",msg:"有進步！多查證會變得更厲害喔！",colorClass:"text-amber-500",bgClass:"bg-amber-50"}; return{rank:"偵探蛋蛋",emoji:"🐣",msg:"別灰心，網路陷阱多，我們再多練習！",colorClass:"text-slate-500",bgClass:"bg-slate-100"}; }
+function updateRankCard(idPrefix,correctCount){ const rankData=getDetectiveRank(correctCount); const cardEl=document.getElementById(idPrefix+'-rank-card'); if(cardEl){ cardEl.className=`rank-card w-full mt-4 ${rankData.bgClass}`; document.getElementById(idPrefix+'-rank-emoji').textContent=rankData.emoji; const titleEl=document.getElementById(idPrefix+'-rank-title'); titleEl.textContent=rankData.rank; titleEl.className=`text-2xl font-black mb-1 ${rankData.colorClass}`; document.getElementById(idPrefix+'-rank-msg').textContent=rankData.msg; } }
+
+// ===== Game 1 =====
+window.AppGame1 = {
+    b1Questions: [
+        // 🛑 危險訊息 (10題)
+        {type:'danger',icon:'🎮',text:'🎮 點這裡免費拿 10000 點遊戲點數！',explanation:'真的遊戲不會用奇怪連結送點數，這是壞人騙你的！',tip:'看到免費禮物的連結，先不要點，告訴爸爸媽媽！'},
+        {type:'danger',icon:'🔑',text:'🔑 輸入你的遊戲密碼來領造型！',explanation:'告訴別人密碼，你的遊戲帳號就會被偷走！',tip:'密碼是你的秘密，絕對不能告訴任何人！'},
+        {type:'danger',icon:'💬',text:'💬 同學說：把手機收到的數字傳給我！',explanation:'手機收到的驗證號碼，給別人就會被盜走帳號！',tip:'手機收到的數字像鑰匙，誰都不能給！'},
+        {type:'danger',icon:'🎁',text:'🎁 中獎啦！先付 100 元運費才能拿 iPhone！',explanation:'要你先付錢才能拿獎品，一定是騙人的！',tip:'要先付錢的獎品都是假的，馬上告訴大人！'},
+        {type:'danger',icon:'⚠️',text:'⚠️ 你的遊戲帳號要被停了！點這裡！',explanation:'壞人想騙你點奇怪連結，騙走你的密碼！',tip:'有問題自己打開遊戲看，不要點奇怪連結！'},
+        {type:'danger',icon:'👩‍🏫',text:'📲 老師說：去超商買 5000 元點數給我，很急！',explanation:'真的老師不會用訊息叫你買點數，這是假老師！',tip:'覺得怪怪的，馬上當面問老師是不是真的！'},
+        {type:'danger',icon:'🎀',text:'🎀 加這個群組，免費送你 500 元禮券！',explanation:'加奇怪的群組，你的資料會被壞人看光光！',tip:'不要隨便加陌生人群組，問爸爸媽媽再決定！'},
+        {type:'danger',icon:'👮',text:'📞 假警察說：你犯法了，快把錢給我保管！',explanation:'真的警察不會打電話叫你給錢，這是壞人裝的！',tip:'聽到要你給錢，馬上掛掉電話告訴爸媽！'},
+        {type:'danger',icon:'📦',text:'📦 簡訊：你的包裹要點連結付錢才能拿！',explanation:'真的宅配不會用簡訊叫你付錢，這是釣魚簡訊！',tip:'看到簡訊裡有連結要錢，直接刪掉不要點！'},
+        {type:'danger',icon:'👻',text:'👻 不傳給 10 個朋友，明天就會倒大楣！',explanation:'這是惡作劇，用嚇你的方法逼你轉傳！',tip:'這種嚇人的訊息直接刪掉，什麼壞事都不會發生！'},
+
+        // 🔍 可疑訊息 (10題)
+        {type:'suspicious',icon:'📷',text:'📷 截圖說明天颱風假！（沒有學校官網證明）',explanation:'截圖很容易被改造，沒有學校官網說的不能信！',tip:'颱風假是大事，要看學校官網或新聞才算數！'},
+        {type:'suspicious',icon:'💬',text:'💬 不認識的人說：學校老師偷錢！',explanation:'不知道是誰說的話，亂傳會傷害到老師！',tip:'沒有證據的傳言不要相信，更不要傳給別人！'},
+        {type:'suspicious',icon:'📺',text:'📺 影片標題：吃糖果可以長高 30 公分！',explanation:'糖果不可能讓你長 30 公分，這是騙點擊的假影片！',tip:'太誇張的事情都是假的，要去問醫生或老師！'},
+        // 【修正5】補 imageAlt 欄位（淹水題）→ 讀屏軟體可以朗讀「一張街道淹水的照片」
+        {type:'suspicious',icon:'🌊',imageUrl:'https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&q=80',imageAlt:'一張街道淹水的照片',text:'📷 有人傳這張淹水照片說「今天台北大淹水！」，但照片沒有日期也沒有地點。',explanation:'這張可能是很久以前或別的國家的舊照片，被拿來騙人說是今天發生的！',tip:'看到驚人照片，先問是哪裡、什麼時候拍的才能判斷真假！'},
+        {type:'suspicious',icon:'🧄',text:'🧄 阿嬤傳：每天吃大蒜，永遠不會生病！',explanation:'沒有任何食物可以讓人完全不生病，這是假的！',tip:'健康問題要問醫生，不要相信網路上的偏方！'},
+        // 【修正5】補 imageAlt 欄位（恐龍題）→「博物館裡的恐龍骨架」
+        {type:'suspicious',icon:'🦴',imageUrl:'https://images.unsplash.com/photo-1519659528534-7fd733a832a0?w=600&q=80',imageAlt:'博物館裡的恐龍骨架',text:'🦴 有人說：附近公園昨天有真的恐龍出沒，大家不要去！',explanation:'恐龍早在六千六百萬年前就滅絕了，這完全是假的傳言！',tip:'照片裡是博物館的恐龍化石，不是真的活恐龍，太誇張的事一定是假的！'},
+        // 【修正A】耳機題 imageAlt 原為「一個人戴著耳機的照片」，
+        //   但 photo-1505740420928 實為白色無線耳機靜物照（無人物）；修正描述更精確
+        {type:'suspicious',icon:'🎧',imageUrl:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',imageAlt:'一副白色無線耳機的照片',text:'🎧 有人傳：每天睡覺時戴耳機聽音樂，大腦會變得超聰明、成績變很好！',explanation:'睡覺時戴耳機不但不會讓大腦變聰明，還會影響睡眠和傷害耳朵！',tip:'太誇張的健康說法要問爸媽或醫生，不要輕易相信！'},
+        {type:'suspicious',icon:'💔',text:'💔 截圖說：你最喜歡的卡通下週就停播了！',explanation:'這種截圖很容易用修圖軟體做出來，可能是假的！',tip:'看到震驚的消息，去卡通的官方頻道看才準！'},
+        // 【修正A】原圖片 photo-1611689342806 是鸚鵡（非老鷹），與題目嚴重不符；
+        //   換用 photo-1551085254-e96b210db58a（Unsplash 真實老鷹頭部特寫）
+        {type:'suspicious',icon:'🦅',imageUrl:'https://images.unsplash.com/photo-1551085254-e96b210db58a?w=600&q=80',imageAlt:'一隻老鷹的頭部特寫照片',text:'🦅 有人說這張老鷹照片裡的老鷹有魔法，背上會長出翅膀！',explanation:'照片是正常老鷹，但文字是假的！真實照片也可以配上假文字騙人！',tip:'看到照片要想想：圖和文字說的有沒有對？文字也可能是假的！'},
+        {type:'suspicious',icon:'🏫',text:'🏫 聽說：下個月開始每天要上課到晚上九點！',explanation:'這只是聽說，沒有學校正式通知，不能相信！',tip:'學校的規定會發正式通知單，「聽說」的不算！'},
+
+        // ✅ 可信訊息 (10題)
+        {type:'credible',icon:'🏫',text:'🏫 學校官網公告：下週三是校外教學日！',explanation:'學校自己的網站是最正確的消息來源！',tip:'學校的事情，看學校官網最準！'},
+        {type:'credible',icon:'📒',text:'📒 老師在聯絡簿寫：明天要帶水壺！',explanation:'老師親手寫的聯絡簿，是最可靠的通知！',tip:'聯絡簿上的字是老師寫的，可以放心相信！'},
+        {type:'credible',icon:'🌀',text:'🌀 氣象局 APP 通知：明天有颱風要來！',explanation:'氣象局是國家專門看天氣的，最準確！',tip:'天氣的事情，看氣象局的 APP 最準！'},
+        {type:'credible',icon:'👮',text:'👮 警察叔叔到學校宣導：不要給陌生人密碼！',explanation:'警察叔叔來學校教的事情是真的，要記得！',tip:'警察叔叔教的安全規則，要乖乖記起來！'},
+        {type:'credible',icon:'🧼',text:'🧼 衛生所阿姨：飯前飯後要用肥皂洗手！',explanation:'衛生所是教大家健康的地方，說的話可以相信！',tip:'醫生和護理師教的健康知識，要照做！'},
+        {type:'credible',icon:'🎒',text:'🎒 學校發的紙本通知：下學期 2/15 開學！',explanation:'學校蓋章發給家長的紙本通知最可靠！',tip:'有學校蓋章的紙本通知，是真的消息！'},
+        {type:'credible',icon:'📺',text:'📺 大電視台新聞：警方抓到詐騙集團！',explanation:'大電視台的新聞有記者確認過，比較可信！',tip:'看新聞要選有信譽的電視台，不要看奇怪的影片！'},
+        {type:'credible',icon:'🏥',text:'🏥 學校護理師通知：流感流行請戴口罩！',explanation:'學校護理師發的健康通知，要乖乖聽！',tip:'學校健康通知，要好好遵守保護自己！'},
+        {type:'credible',icon:'👨‍👩‍👧',text:'👨‍👩‍👧 媽媽親口說：不要把名字告訴陌生人！',explanation:'爸爸媽媽教你的安全規則，最真實也最重要！',tip:'爸媽教的安全規則一定要記住喔！'},
+        {type:'credible',icon:'🎮',text:'🎮 遊戲開機畫面公告：請小心假冒客服！',explanation:'遊戲自己的公告才是真的，會教你怎麼保護帳號！',tip:'遊戲裡的事情，看遊戲的官方公告最準！'},
+
+        // 🛑 危險訊息補充 (5題)
+        {type:'danger',icon:'🎠',text:'🎠 加這個帳號好友，馬上送你一整套絨毛玩具！',explanation:'用免費禮物引誘你加陌生人，是壞人常用的方法！',tip:'不認識的人送你大禮物，一定要先告訴爸爸媽媽！'},
+        {type:'danger',icon:'🖥️',text:'🖥️ 你的平板中毒了！點這裡立刻免費修復！',explanation:'這是假病毒警告，點了才真的會有問題！',tip:'看到這種可怕警告，關掉畫面告訴爸媽！'},
+        {type:'danger',icon:'🎯',text:'🎯 只有你被選中了！輸入學校名稱和班級就能領獎！',explanation:'騙你填學校資料的人可能是壞人在收集資訊！',tip:'不管多誘人的獎品，填個人資料前要問爸媽！'},
+        {type:'danger',icon:'📸',text:'📸 傳一張你的照片給我，就送你遊戲點數！',explanation:'把照片傳給陌生人很危險，壞人可能拿去做壞事！',tip:'照片比密碼更重要，絕對不能傳給陌生人！'},
+        {type:'danger',icon:'🛒',text:'🛒 限時 60 秒！點這裡買一送十，過了就沒了！',explanation:'故意製造緊迫感讓你來不及思考，是詐騙常用手法！',tip:'越是「快點快點」催你，越要先停下來想一想！'},
+
+        // 🔍 可疑訊息補充 (5題)
+        {type:'suspicious',icon:'🍫',text:'🍫 有人傳：每天吃糖果，牙齒反而會變得超白超健康！',explanation:'糖果吃多了只會蛀牙，完全沒有讓牙齒變白的效果！',tip:'跟常識相反的說法要特別懷疑，去問牙醫才準！'},
+        {type:'suspicious',icon:'🌧️',text:'🌧️ 同學傳訊息說：因為昨天太多人許願，所以今天不會下雨！',explanation:'天氣是自然現象，和許不許願完全沒有關係！',tip:'看到奇怪的科學說法，要去問爸媽或老師！'},
+        {type:'suspicious',icon:'🌙',text:'🌙 傳言：今晚摸一下月亮形狀的石頭，明天考試就會考 100 分！',explanation:'這是沒有根據的迷信說法，考試成績靠的是認真念書！',tip:'這種神奇說法不要信，好好複習才是真的！'},
+        {type:'suspicious',icon:'🎒',text:'🎒 同學說：學校明天要發免費文具給每個人，快去排隊！',explanation:'這只是同學的傳言，沒有學校正式通知不能相信！',tip:'免費發東西這麼大的事，老師一定會先通知！'},
+        {type:'suspicious',icon:'🚌',text:'🚌 同學說：聽說今天校車司機請假，所以不來接我們了！',explanation:'校車若有異動，學校一定會正式通知家長，不會只靠同學傳話！',tip:'學校交通有問題，直接打電話問學校或爸媽！'},
+
+        // ✅ 可信訊息補充 (5題)
+        {type:'credible',icon:'🦷',text:'🦷 牙醫叔叔說：每天刷牙兩次才不會蛀牙！',explanation:'牙醫是專門照顧牙齒健康的醫生，說的話可以信！',tip:'牙醫教的健康習慣要乖乖做到！'},
+        {type:'credible',icon:'🚸',text:'🚸 學校門口的交通導護阿姨說：要走行人專用道！',explanation:'交通導護阿姨是幫忙維護安全的大人，要聽她說的！',tip:'交通規則要聽有執行任務的大人說的！'},
+        {type:'credible',icon:'💊',text:'💊 家庭醫生阿姨說：感冒藥要照時間吃，不能自己多吃！',explanation:'醫生開的藥有專業建議，一定要照指示吃！',tip:'藥的事情一定要聽醫生說的，不能自己決定！'},
+        {type:'credible',icon:'🏊',text:'🏊 游泳教練說：下水前要先做暖身操，才不會抽筋！',explanation:'教練是專業的，教的安全守則非常重要！',tip:'專業教練說的安全守則要好好遵守！'},
+        {type:'credible',icon:'📡',text:'📡 學校廣播系統通知：今天第三節課改成全校集會！',explanation:'學校廣播是正式的通知方式，是真的消息！',tip:'學校廣播說的事情可以放心相信！'},
+
+        // ===== 【新增】前冊圖片題補充 (3道，共7道) =====
+        // 新增原因：圖片題是最有教學效果的題型，從 4 道補到 7 道，
+        // 且原 4 道全屬 suspicious，此次補足 danger 和 credible 各 1 道，
+        // 讓三種類型都有真實照片輔助，教學效果更均衡。
+
+        // 【新增圖片題1 — danger】手機詐騙截圖
+        // photo-1563203369-26f2e4a5ccf7：手機螢幕顯示訊息的照片
+        {type:'danger',icon:'📱',
+         imageUrl:'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?w=600&q=80',
+         imageAlt:'一隻手拿著手機顯示訊息的照片',
+         text:'📱 有人傳來這張截圖說：「恭喜你中了大獎，點這裡領取！」',
+         explanation:'這種「恭喜中獎」的訊息幾乎都是詐騙，點了連結會有危險！',
+         tip:'突然說你中獎的訊息，先告訴爸媽，絕對不要點連結！'},
+
+        // 【新增圖片題2 — suspicious】街上人群戴口罩（可疑健康謠言）
+        // photo-1584464491033-06628f3a6b7b：人群戴口罩的照片
+        {type:'suspicious',icon:'😷',
+         imageUrl:'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&q=80',
+         imageAlt:'街道上許多人戴著口罩的照片',
+         text:'😷 有人傳這張照片說「這個地方發生超嚴重疫情，大家快逃！」，但沒有說是哪裡也沒有新聞。',
+         explanation:'照片裡戴口罩可能只是平常防護，沒有說明地點和時間就說「超嚴重疫情」是誇大的假消息！',
+         tip:'看到可怕的健康消息，先去衛生福利部官網查，不要馬上相信或轉傳！'},
+
+        // 【新增圖片題3 — credible】醫生白袍（官方健康通知）
+        // photo-1576091160550-2173dba999ef：穿白袍的醫生照片
+        {type:'credible',icon:'👨‍⚕️',
+         imageUrl:'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=80',
+         imageAlt:'一位穿白袍的醫生正在診療的照片',
+         text:'👨‍⚕️ 學校護理師傳來這張照片和通知：「最近流感盛行，請大家記得洗手、戴口罩！」',
+         explanation:'學校護理師是專業的健康人員，她發的健康通知是真的，要乖乖照做！',
+         tip:'學校護理師和醫生的健康提醒要認真聽，照著做才能保護自己！'},
+    ],
+
+    b1CurrentDeck:[],b1CurrentIndex:0,b1Correct:0,b1Wrong:0,currentQuestion:null,
+    isRetryMode:false, // Bug修正二：重練模式旗標
+    hp:3, maxHp:3,    // 修改二：血量系統
+    // 新功能三：各類型答對統計
+    correctByType:{danger:0,suspicious:0,credible:0},
+    totalByType:{danger:0,suspicious:0,credible:0},
+    timerId:null,timeLeft:30,maxSeconds:30,combo:0,maxCombo:0,errorTypes:new Set(),
+
+    startGame:function(){
+        // 讀取儲存的秒數設定（功能一）
+        try{
+            const saved=localStorage.getItem('detective_timer');
+            if(saved){ this.maxSeconds=parseInt(saved); }
+            // 同步更新設定視窗的滑桿
+            const sl=document.getElementById('timer-slider');
+            const dp=document.getElementById('timer-display');
+            if(sl){ sl.value=this.maxSeconds; }
+            if(dp){ dp.textContent=this.maxSeconds+'秒'; }
+        }catch(e){}
+        // 檢查是否需要顯示教學
+        let tutDone=false;
+        try{tutDone=localStorage.getItem('detective_tutorial_done')==='1';}catch(e){}
+        if(!tutDone){
+            // 重設教學頁面到第1頁
+            document.querySelectorAll('.tutorial-page').forEach(p=>p.classList.remove('active'));
+            document.getElementById('tut-page-1').classList.add('active');
+            document.getElementById('b1-tutorial-overlay').classList.remove('global-hidden');
+        } else {
+            this._doStartGame();
+        }
+    },
+    _doStartGame:function(){
+        document.getElementById('b1-screen-end').classList.add('global-hidden');
+        document.getElementById('b1-screen-game').classList.remove('global-hidden');
+        document.getElementById('b1-hud').classList.remove('global-hidden');
+        this.isRetryMode=false; // Bug修正二：正式開始時關閉重練模式旗標
+        // 修改二：重置血量
+        this.hp=this.maxHp;
+        updateHpDisplay(this.hp);
+        // 確保 gameover 橫幅隱藏
+        const gob=document.getElementById('b1-gameover-banner');
+        if(gob) gob.style.display='none';
+        // Bug2修正：恢復朗讀按鈕（防止上局 gameOver 後殘留禁用狀態）
+        const speakBtnRS=document.getElementById('b1-speak-btn');
+        if(speakBtnRS){speakBtnRS.style.opacity='1';speakBtnRS.style.pointerEvents='auto';}
+
+        // 【新增】難度遞進 — 把 10 題分三組建立 deck
+        // 先用 filterRecentFromPool 把近 15 道出現過的題目排在後面，
+        // 優先選「新鮮」的題目，讓玩家每局都有新體驗
+        const fullPool = [...this.b1Questions];
+        const freshPool = filterRecentFromPool(fullPool, 10);   // 過濾近期題目
+        const danger   = shuffle(freshPool.filter(q=>q.type==='danger'));
+        const credible = shuffle(freshPool.filter(q=>q.type==='credible'));
+        const suspicious=shuffle(freshPool.filter(q=>q.type==='suspicious'));
+        // pool 仍指向完整題庫，用於保底補題
+        const pool = fullPool;
+        // 有圖片的題目單獨列出，供後段優先使用
+        const withImg  = freshPool.filter(q=>q.imageUrl);
+
+        // 第 1~3 題：只有 danger 和 credible（最直觀）
+        const group1 = shuffle([
+            danger.pop(),   danger.pop(),
+            credible.pop()
+        ]).filter(Boolean);
+
+        // 第 4~7 題：三種都有，但 suspicious 至少 2 題
+        const group2 = shuffle([
+            suspicious.pop(), suspicious.pop(),
+            danger.pop(),     credible.pop()
+        ]).filter(Boolean);
+
+        // 第 8~10 題：三種平均，且若有圖片題優先排入
+        let g3cands = [
+            suspicious.length ? suspicious.pop() : null,
+            danger.length     ? danger.pop()     : null,
+            credible.length   ? credible.pop()   : null
+        ].filter(Boolean);
+        // 嘗試替換一題為有圖片的題（若該題不在前兩組中）
+        const usedIds = new Set([...group1,...group2].map(q=>q.text));
+        const imgCandidate = withImg.find(q=>!usedIds.has(q.text) && !g3cands.includes(q));
+        if(imgCandidate && g3cands.length > 0){
+            g3cands[g3cands.length-1] = imgCandidate;
+        }
+        const group3 = shuffle(g3cands);
+
+        this.b1CurrentDeck = [...group1, ...group2, ...group3];
+
+        // 保底機制 — 若 deck 不足 10 題，從完整 pool 補足（含舊題）
+        const usedTexts = new Set(this.b1CurrentDeck.map(q=>q.text));
+        const remaining = shuffle(pool.filter(q=>!usedTexts.has(q.text)));
+        while(this.b1CurrentDeck.length < 10 && remaining.length > 0){
+            this.b1CurrentDeck.push(remaining.pop());
+        }
+        // 最多只取 10 題
+        this.b1CurrentDeck = this.b1CurrentDeck.slice(0, 10);
+        this.b1CurrentIndex=0; this.b1Correct=0; this.b1Wrong=0;
+        this.combo=0; this.maxCombo=0; this.errorTypes.clear(); this.wrongDeck=[];
+        // 新功能三：重置各類型統計
+        this.correctByType={danger:0,suspicious:0,credible:0};
+        this.totalByType={danger:0,suspicious:0,credible:0};
+        document.getElementById('b1-hud-combo').textContent=this.combo;
+        this.loadQuestion();
+    },
+    retryWrong:function(){
+        if(!this.wrongDeck||this.wrongDeck.length===0)return;
+        window.SharedAudio.playSFX('click');
+        document.getElementById('b1-screen-end').classList.add('global-hidden');
+        document.getElementById('b1-screen-game').classList.remove('global-hidden');
+        document.getElementById('b1-hud').classList.remove('global-hidden');
+        this.b1CurrentDeck=shuffle([...this.wrongDeck]);
+        this.b1CurrentIndex=0;this.b1Correct=0;this.b1Wrong=0;
+        this.combo=0;this.maxCombo=0;this.errorTypes.clear();this.wrongDeck=[];
+        // Bug修正一：重置各類型統計，確保重練後結算顯示正確
+        this.correctByType={danger:0,suspicious:0,credible:0};
+        this.totalByType={danger:0,suspicious:0,credible:0};
+        // Bug修正二：進入重練模式
+        this.isRetryMode=true;
+        // 修改二：重置血量
+        this.hp=this.maxHp;
+        updateHpDisplay(this.hp);
+        const gob=document.getElementById('b1-gameover-banner');
+        if(gob) gob.style.display='none';
+        document.getElementById('b1-hud-combo').textContent=this.combo;
+        this.loadQuestion();
+    },
+    loadQuestion:function(){
+        if(this.b1CurrentIndex>=this.b1CurrentDeck.length){this.endGame();return;}
+        this.currentQuestion=this.b1CurrentDeck[this.b1CurrentIndex];
+        document.getElementById('b1-hud-progress').textContent=`${this.b1CurrentIndex+1}/10`;
+        document.getElementById('b1-card-icon').textContent=this.currentQuestion.icon;
+        document.getElementById('b1-card-text').textContent=this.currentQuestion.text;
+        // 新功能D：更新 HUD 難度指示燈
+        updateStageLight(this.b1CurrentIndex);
+
+        // 新功能一：難度升級橫幅（進入第 4 題與第 8 題時提示）
+        // Bug修正二：重練模式下不顯示難度升級橫幅
+        if(!this.isRetryMode && this.b1CurrentIndex===3){
+            setTimeout(()=>showStageBanner('🔍 進入進階關卡！<br>可疑訊息出現了！', '#fde047', false), 200);
+        } else if(!this.isRetryMode && this.b1CurrentIndex===7){
+            setTimeout(()=>showStageBanner('🏆 最後三題！<br>圖片線索出現了！', '#fb923c', false), 200);
+        }
+        // 修正四：每次換題先重置 fallback 狀態
+        const fallbackEl=document.getElementById('b1-img-fallback');
+        if(fallbackEl) fallbackEl.style.display='none';
+        // 修改四：圖片題顯示「仔細看圖片！」提示，引導孩子圖文比對
+        const imgHintEl=document.getElementById('b1-img-hint');
+        if(imgHintEl) imgHintEl.style.display=this.currentQuestion.imageUrl?'block':'none';
+        // 功能二：處理真實圖片
+        const imgEl=document.getElementById('b1-card-img');
+        const iconEl=document.getElementById('b1-card-icon');
+        if(this.currentQuestion.imageUrl){
+            imgEl.src=this.currentQuestion.imageUrl;
+            // 【修正5-b】動態設定 alt，讓讀屏軟體（如 VoiceOver / TalkBack）能朗讀
+            //   圖片內容，提升視覺障礙兒童的無障礙體驗；fallback 為通用文字
+            imgEl.alt=this.currentQuestion.imageAlt||'題目圖片';
+            imgEl.style.display='block';
+            iconEl.style.display='none';
+        } else {
+            // 【iOS Safari bug 修正】src='' 在 Safari/iOS 會被當作載入「空路徑」
+            // 觸發 onerror → 顯示「圖片載入中」fallback → 非圖片題也出現轉圈圈
+            // 正確做法：removeAttribute('src') 完全移除屬性，不觸發任何 load/error
+            imgEl.style.display='none';
+            imgEl.removeAttribute('src');
+            imgEl.alt='題目圖片';   // 重置，避免上一題的 alt 殘留
+            iconEl.style.display='';
+        }
+        // 優化二：每3題打亂按鈕順序
+        if(this.b1CurrentIndex%3===0){
+            const btnWrap=document.querySelector('.b1-btn-row');
+            if(btnWrap){
+                const btns=Array.from(btnWrap.children);
+                // 淡出
+                btnWrap.style.opacity='0';
+                btnWrap.style.transition='opacity 0.2s';
+                // shuffle
+                for(let i=btns.length-1;i>0;i--){
+                    const j=Math.floor(Math.random()*(i+1));
+                    btnWrap.appendChild(btns[j]);
+                    btns.splice(j,1);
+                }
+                // 淡入
+                setTimeout(()=>{ btnWrap.style.opacity='1'; },200);
+            }
+        }
+        this.timeLeft=this.maxSeconds; this.updateTimerUI(); clearInterval(this.timerId);
+        this.timerId=setInterval(()=>{
+            this.timeLeft-=0.1; this.updateTimerUI();
+            if(this.timeLeft<=0){clearInterval(this.timerId);this.judgeAnswer('timeout');}
+        },100);
+    },
+    isPaused:false,
+    updateTimerUI:function(){
+        const fill=document.getElementById('b1-timer-fill'),pct=(this.timeLeft/this.maxSeconds)*100;
+        fill.style.width=`${pct}%`;
+        const secsEl=document.getElementById('b1-timer-secs');
+        const secs=Math.ceil(this.timeLeft);
+        if(secsEl){
+            secsEl.textContent=secs;
+            // 【修正7】原固定 secs<=9 在不同難度下體驗不一致：
+            //   15 秒模式：9 秒（60%）就開始閃 → 太早，沒有緊張感遞進
+            //   45 秒模式：9 秒（20%）才開始閃 → 太晚，錯過緊張窗口
+            //   改為「剩餘時間 ≤ 總時間 30%」，三種模式的閃爍時機等比縮放：
+            //   15秒 → 剩 5秒閃  |  30秒 → 剩 9秒閃  |  45秒 → 剩 14秒閃
+            const urgentThreshold=Math.ceil(this.maxSeconds*0.3);
+            if(secs<=urgentThreshold){secsEl.classList.add('urgent');}else{secsEl.classList.remove('urgent');}
+        }
+        if(pct>50){fill.style.backgroundColor='#22c55e';}
+        else if(pct>20){fill.style.backgroundColor='#eab308';}
+        else{fill.style.backgroundColor='#ef4444';}
+        // 🎵 把緊張度傳給 BGM (時間越少緊張度越高)
+        // 【修正B】原公式 1-(timeLeft/15) 寫死基準為 15 秒；
+        //   30 秒模式：剩 30 秒時 tension=-1（負數，被 clamp 成 0），BGM 前半段完全無緊張感
+        //   45 秒模式：前 30 秒 tension 全都是負數，完全失去動態效果
+        //   修正：改用 1-(timeLeft/maxSeconds)，三種模式等比縮放，0 秒時剛好為 1
+        if(window.SharedAudio && window.SharedAudio.setGameTension){
+            const tension = 1 - (this.timeLeft / this.maxSeconds);
+            window.SharedAudio.setGameTension(tension);
+        }
+    },
+    togglePause:function(){
+        const btn=document.getElementById('b1-pause-btn');
+        if(!this.timerId&&!this.isPaused)return;
+        if(this.isPaused){
+            // 取消暫停
+            this.isPaused=false;
+            if(btn)btn.innerHTML='⏸ 暫停';
+            const card=document.getElementById('b1-main-card');
+            const ov=document.getElementById('b1-pause-overlay');
+            if(ov)ov.remove();
+            // 恢復朗讀按鈕
+            const speakBtn=document.getElementById('b1-speak-btn');
+            if(speakBtn){speakBtn.style.opacity='1'; speakBtn.style.pointerEvents='auto';}
+            this.timerId=setInterval(()=>{
+                this.timeLeft-=0.1; this.updateTimerUI();
+                if(this.timeLeft<=0){clearInterval(this.timerId);this.judgeAnswer('timeout');}
+            },100);
+            // 恢復緊張BGM
+            if(window.SharedAudio && !window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+                window.SharedAudio.startGameBGM();
+            }
+        } else {
+            // 進入暫停
+            this.isPaused=true;
+            clearInterval(this.timerId);
+            if(btn)btn.innerHTML='▶ 繼續';
+            const card=document.getElementById('b1-main-card');
+            const ov=document.createElement('div'); ov.id='b1-pause-overlay'; ov.className='paused-overlay';
+            ov.innerHTML='<div class="paused-label">⏸ 暫停中</div>';
+            card.appendChild(ov);
+            // 停止緊張BGM
+            if(window.SharedAudio)window.SharedAudio.stopGameBGM();
+            // 取消朗讀 + 朗讀按鈕變灰
+            if('speechSynthesis' in window) window.speechSynthesis.cancel();
+            const speakBtn=document.getElementById('b1-speak-btn');
+            if(speakBtn){speakBtn.style.opacity='0.3'; speakBtn.style.pointerEvents='none';}
+        }
+        if(window.SharedAudio)window.SharedAudio.playSFX('click');
+    },
+    showComboAnim:function(text){
+        const a=document.getElementById('b1-combo-anim');
+        a.textContent=text; a.style.animation='none'; void a.offsetWidth;
+        a.style.animation='popBounce 2.0s forwards';
+    },
+    // 優化九：朗讀題目（暫停計時器）
+    speakQuestion:function(){
+        if(this.isPaused)return;
+        if(this.hp<=0)return; // Bug2修正：血量歸零後禁止朗讀
+        if(!this.currentQuestion)return;
+        if(!('speechSynthesis' in window)){alert('您的瀏覽器不支援朗讀功能');return;}
+        try{
+            // 取消之前的朗讀
+            window.speechSynthesis.cancel();
+            // 暫停計時器
+            const wasRunning=!!this.timerId;
+            if(wasRunning){
+                clearInterval(this.timerId);
+                this.timerId=null;
+            }
+            // 【修正E】圖片題朗讀：在題目文字前先說出圖片描述（imageAlt），
+            //   讓視障兒童或聽覺學習者知道圖片內容，避免只聽題目文字卻不知道圖在說什麼
+            const hasImg = !!this.currentQuestion.imageUrl;
+            const imgDesc = hasImg ? ('圖片顯示：' + (this.currentQuestion.imageAlt || '一張照片') + '。') : '';
+            const text = imgDesc + this.currentQuestion.text;
+            const utter=new SpeechSynthesisUtterance(text);
+            utter.lang='zh-TW';
+            utter.rate=0.85;
+            utter.pitch=1.1;
+            // 朗讀結束後恢復計時
+            utter.onend=()=>{
+                if(wasRunning && !this.isPaused){
+                    const gameScreen=document.getElementById('b1-screen-game');
+                    if(gameScreen && !gameScreen.classList.contains('global-hidden')){
+                        this.timerId=setInterval(()=>{
+                            this.timeLeft-=0.1; this.updateTimerUI();
+                            if(this.timeLeft<=0){clearInterval(this.timerId);this.judgeAnswer('timeout');}
+                        },100);
+                    }
+                }
+            };
+            window.speechSynthesis.speak(utter);
+        }catch(e){console.error(e);}
+    },
+    judgeAnswer:function(selectedType){
+        // 功能五：防呆 - 立刻鎖定按鈕防止連點
+        const btnRow=document.querySelector('.b1-btn-row');
+        if(btnRow) btnRow.style.pointerEvents='none';
+        clearInterval(this.timerId);
+        // 答題瞬間立刻停止緊張BGM，讓答對／時間到音效清楚播放
+        if(window.SharedAudio)window.SharedAudio.stopGameBGM();
+        if(selectedType!=='timeout')window.SharedAudio.playSFX('click');
+        const isCorrect=(this.currentQuestion.type===selectedType);
+        const popup=document.getElementById('b1-feedback-popup');
+        const title=document.getElementById('b1-feedback-title');
+        const category=document.getElementById('b1-feedback-category');
+        let catName="",catColor="",catBg="";
+        if(this.currentQuestion.type==='danger'){catName='🛑 危險訊息';catColor='text-red-700';catBg='bg-red-100 border-red-300';}
+        else if(this.currentQuestion.type==='suspicious'){catName='🔍 可疑訊息';catColor='text-yellow-700';catBg='bg-yellow-100 border-yellow-300';}
+        else{catName='✅ 可信訊息';catColor='text-green-700';catBg='bg-green-100 border-green-300';}
+        if(isCorrect){
+            this.b1Correct++; this.combo++;
+            // 新功能三：累計各類型答對數
+            if(this.totalByType)  this.totalByType[this.currentQuestion.type]=(this.totalByType[this.currentQuestion.type]||0)+1;
+            if(this.correctByType) this.correctByType[this.currentQuestion.type]=(this.correctByType[this.currentQuestion.type]||0)+1;
+            if(this.combo>this.maxCombo)this.maxCombo=this.combo;
+            document.getElementById('b1-hud-combo').textContent=this.combo;
+            // 修正六：每一連勝都有對應回饋
+            if(this.combo===2)  this.showComboAnim('✨ 連對 2 題！');
+            else if(this.combo===3) this.showComboAnim('🔥 連對 3 題！加油！');
+            else if(this.combo===4) this.showComboAnim('⚡ 連對 4 題！超厲害！');
+            else if(this.combo===5) this.showComboAnim('🌟 連對 5 題！偵探眼力！');
+            else if(this.combo===6) this.showComboAnim('💫 連對 6 題！無法阻擋！');
+            else if(this.combo>=7)  this.showComboAnim(`🏆 連對 ${this.combo} 題！傳說中的偵探！`);
+            // 優化一：答對第5題中場驚喜
+            if(this.b1Correct===5) setTimeout(()=>showMidpointBanner(), 100);
+            window.SharedAudio.playSFX('correct');
+            title.innerHTML='🎉 答對了！';
+            title.className='text-4xl md:text-5xl font-black mb-4 text-green-600';
+            // 特效：星星爆炸 + 綠色閃光 + 彈跳
+            const card=document.getElementById('b1-main-card');
+            fxCorrect(card);
+            card.classList.remove('b1-card-bounce','b1-glow-correct','b1-glow-wrong'); void card.offsetWidth;
+            card.classList.add('b1-card-bounce','b1-glow-correct');
+            setTimeout(()=>card.classList.remove('b1-card-bounce','b1-glow-correct'),600);
+        } else {
+            this.b1Wrong++; this.combo=0;
+            // 新功能三：累計各類型出題數（無論對錯）
+            if(this.totalByType) this.totalByType[this.currentQuestion.type]=(this.totalByType[this.currentQuestion.type]||0)+1;
+            document.getElementById('b1-hud-combo').textContent=this.combo;
+            this.errorTypes.add(this.currentQuestion.type);
+            if(selectedType!=='timeout') this.wrongDeck.push(this.currentQuestion);
+            // 修改二：扣血並檢查是否血量歸零
+            this.hp--;
+            updateHpDisplay(this.hp);
+            if(selectedType==='timeout'){
+                window.SharedAudio.playSFX('timeout');
+                title.innerHTML='⏰ 時間到！';
+                title.className='text-4xl md:text-5xl font-black mb-4 text-amber-600';
+                document.getElementById('b1-feedback-tip').innerHTML="下次要快一點喔！<br>"+this.currentQuestion.tip;
+                fxTimeout();
+                const cardT=document.getElementById('b1-main-card');
+                cardT.classList.remove('b1-glow-correct','b1-glow-wrong'); void cardT.offsetWidth;
+                cardT.classList.add('b1-glow-wrong');
+                setTimeout(()=>cardT.classList.remove('b1-glow-wrong'),600);
+            } else {
+                window.SharedAudio.playSFX('wrong');
+                title.innerHTML='😅 答錯囉！';
+                title.className='text-4xl md:text-5xl font-black mb-4 text-rose-600';
+                document.getElementById('b1-feedback-tip').textContent=this.currentQuestion.tip;
+                const cardW=document.getElementById('b1-main-card');
+                fxWrong(cardW);
+                cardW.classList.remove('b1-glow-correct','b1-glow-wrong'); void cardW.offsetWidth;
+                cardW.classList.add('b1-glow-wrong');
+                setTimeout(()=>cardW.classList.remove('b1-glow-wrong'),600);
+            }
+            // 修改二：血量歸零，延遲 1.5 秒後 game over（讓特效先播完）
+            if(this.hp<=0){
+                setTimeout(()=>this.gameOver(),1500);
+                return; // 不繼續顯示一般答題彈窗
+            }
+        }
+        category.innerHTML=`正確分類：${catName}`;
+        // 修正四：放大 + pulse 動畫
+        category.className=`font-black mb-4 px-5 py-3 border-4 rounded-2xl inline-block cat-badge-pulse ${catColor} ${catBg}`;
+        category.style.fontSize='1.5rem';
+        // 重新觸發動畫
+        category.classList.remove('cat-badge-pulse'); void category.offsetWidth;
+        category.classList.add('cat-badge-pulse');
+        // 優化六：填入原題目資料
+        const recapIcon=document.getElementById('b1-recap-icon');
+        const recapText=document.getElementById('b1-recap-text');
+        // 【修正F】填入 recap 圖片（圖片題顯示縮圖，非圖片題隱藏）
+        const recapImg=document.getElementById('b1-recap-img');
+        if(recapImg){
+            if(this.currentQuestion.imageUrl){
+                recapImg.src=this.currentQuestion.imageUrl;
+                recapImg.alt=this.currentQuestion.imageAlt||'題目圖片';
+                recapImg.style.display='block';
+                if(recapIcon)recapIcon.style.display='none';
+            } else {
+                recapImg.style.display='none';
+                recapImg.removeAttribute('src'); // 同主圖修正，避免 Safari src='' 觸發 error
+                if(recapIcon)recapIcon.style.display='';
+            }
+        }
+        if(recapIcon && !this.currentQuestion.imageUrl)recapIcon.textContent=this.currentQuestion.icon;
+        if(recapText)recapText.textContent=this.currentQuestion.text;
+        document.getElementById('b1-feedback-reason').textContent=this.currentQuestion.explanation;
+        // 優化1: 判斷線索視覺提示
+        const cluePanel=document.getElementById('b1-clue-panel');
+        const clueTags=document.getElementById('b1-clue-tags');
+        const clueTitle=document.getElementById('b1-clue-title');
+        if(cluePanel&&clueTags){
+            const clueSets={
+                danger:{title:'🛑 危險訊號',cls:'danger',tags:['叫你輸入密碼','要你先付錢','來路不明的連結','假裝是認識的人','叫你去超商','叫你不告訴爸媽'],tagCls:'d',textColor:'text-red-900'},
+                suspicious:{title:'🔍 可疑線索',cls:'suspicious',tags:['沒說是誰說的','只有圖片沒有說明','說得太誇張','沒有時間和地點','聽說聽說的','不知道是誰說的'],tagCls:'s',textColor:'text-yellow-900'},
+                credible:{title:'✅ 可信特徵',cls:'credible',tags:['學校老師說的','學校發的紙本通知','爸爸媽媽親口說','政府機關公告','有名的電視台新聞','衛生所醫護說的'],tagCls:'c',textColor:'text-green-900'}
+            };
+            const cs=clueSets[this.currentQuestion.type]||clueSets.credible;
+            cluePanel.className=`b1-clue-box mb-3 ${cs.cls}`;
+            clueTitle.textContent=cs.title;
+            clueTags.innerHTML=cs.tags.map(t=>`<span class="b1-clue-tag ${cs.tagCls}">${t}</span>`).join('');
+        }
+        // 特效先播完再顯示彈窗
+        popup.classList.add('global-hidden');
+        // 修正五：先隱藏「下一題」按鈕，1.5 秒後才出現
+        const nextBtn=document.getElementById('b1-next-question-btn');
+        if(nextBtn){ nextBtn.style.visibility='hidden'; nextBtn.disabled=true; }
+        // 彈窗出現後再過 1.5 秒才顯示「下一題」按鈕
+        const popupDelay = isCorrect?550:(selectedType==='timeout'?1100:650);
+        setTimeout(()=>{
+            if(nextBtn){ nextBtn.style.visibility='visible'; nextBtn.disabled=false; }
+        }, popupDelay + 1500);
+        if(isCorrect){
+            // 答對：等星星爆炸播完再顯示（0.55秒）
+            setTimeout(()=>popup.classList.remove('global-hidden'), 550);
+        } else if(selectedType==='timeout'){
+            // 超時：等鐘錶爆炸特效播完（1.1秒）
+            setTimeout(()=>popup.classList.remove('global-hidden'), 1100);
+        } else {
+            // 答錯：等搖晃動畫播完（0.65秒）
+            setTimeout(()=>popup.classList.remove('global-hidden'), 650);
+        }
+    },
+    nextQuestion:function(){
+        window.SharedAudio.playSFX('click');
+        // 取消任何進行中的朗讀
+        if('speechSynthesis' in window) window.speechSynthesis.cancel();
+        document.getElementById('b1-feedback-popup').classList.add('global-hidden');
+        // 功能五：恢復按鈕可點擊
+        const btnRow=document.querySelector('.b1-btn-row');
+        if(btnRow) btnRow.style.pointerEvents='';
+        this.b1CurrentIndex++;
+        this.loadQuestion();
+        // 進入下一題時，重啟緊張配樂（如果使用者沒靜音）
+        if(window.SharedAudio && !window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+            setTimeout(()=>window.SharedAudio.startGameBGM(), 200);
+        }
+    },
+    wrongDeck:[],
+    endGame:function(){
+        clearInterval(this.timerId);
+        window.SharedAudio.playSFX('complete');
+        // 【新增】正常完成時記錄本局題目到「近期不重複」清單
+        recordRecentDeck(this.b1CurrentDeck);
+        document.getElementById('b1-screen-game').classList.add('global-hidden');
+        document.getElementById('b1-hud').classList.add('global-hidden');
+        document.getElementById('b1-screen-end').classList.remove('global-hidden');
+        // 修改二：正常完成時隱藏失敗橫幅
+        const gob=document.getElementById('b1-gameover-banner');
+        if(gob) gob.style.display='none';
+        // UX5修正：正常完成時恢復「去試試後冊！」按鈕
+        const gotoB2end=document.getElementById('b1-goto-b2-btn');
+        if(gotoB2end) gotoB2end.style.display='';
+        document.getElementById('b1-end-correct').textContent=this.b1Correct;
+        document.getElementById('b1-end-combo').textContent=this.maxCombo;
+        updateRankCard('b1',this.b1Correct);
+        const isNew=checkAndSaveBest('b1',this.b1Correct);
+        // 【修正C】原 endGame（正常完成）沒有呼叫 updateHubBestScores，
+        //   導致玩完前冊後立刻回首頁，等級徽章和積分橫幅仍顯示舊數字；
+        //   gameOver（血量歸零）有呼叫但 endGame 漏了，統一補上
+        updateHubBestScores();
+        const badgeWrap=document.getElementById('b1-new-record-badge');
+        if(badgeWrap)badgeWrap.style.display=isNew?'block':'none';
+        if(this.b1Correct===10)launchFireworks();
+        // 錯題複習按鈕：有答錯才顯示
+        const retryWrap=document.getElementById('b1-retry-wrong-wrap');
+        if(retryWrap)retryWrap.style.display=this.b1Wrong>0?'block':'none';
+        const summaryEl=document.getElementById('b1-personal-summary');
+        if(this.b1Wrong===0){
+            summaryEl.innerHTML='🌟 <strong>超厲害！</strong>你沒有被任何假訊息騙到！<br>你是最強小偵探！';
+            summaryEl.className='w-full bg-green-50 border-4 border-green-300 rounded-2xl p-5 mb-8 text-left font-bold text-lg leading-relaxed text-green-800';
+        } else {
+            let msg='📝 <strong>這次學到的重點：</strong><br><ul class="list-disc pl-5 mt-2 space-y-2">';
+            if(this.errorTypes.has('danger')){msg+='<li>🛑 看到要密碼、要付錢的連結，絕對不要點！</li>';}
+            if(this.errorTypes.has('suspicious')){msg+='<li>🔍 沒有來源的截圖和誇張消息，要查證再說！</li>';}
+            if(this.errorTypes.has('credible')){msg+='<li>✅ 學校官網和政府機關的公告是可以相信的！</li>';}
+            msg+='</ul>';
+            // 優化3: 分類專屬建議
+            if(this.errorTypes.has('danger')&&!this.errorTypes.has('suspicious')&&!this.errorTypes.has('credible')){
+                msg+='<br>🎯 <strong>建議：</strong>你對「危險訊息」的判斷還需要加強！記住：要密碼、要付錢、要驗證碼就是危險訊息，絕對不要配合！';
+            }else if(this.errorTypes.has('suspicious')&&!this.errorTypes.has('danger')&&!this.errorTypes.has('credible')){
+                msg+='<br>🎯 <strong>建議：</strong>你對「可疑訊息」的判斷還可以加強！建議多練習查證步驟，遇到沒來源的消息先用 Google 搜尋！';
+            }else if(this.errorTypes.has('credible')&&!this.errorTypes.has('danger')&&!this.errorTypes.has('suspicious')){
+                msg+='<br>🎯 <strong>建議：</strong>你有時會把「可信訊息」當成假的！記住：學校官網(.edu.tw)和政府機關(.gov.tw)的公告都可以放心相信！';
+            }else if(this.errorTypes.size>1){
+                msg+='<br>🎯 <strong>建議：</strong>多種訊息類型都需要練習，建議重玩幾次，每次都會更進步！';
+            }
+            msg+='<br><br>下次一定可以更好！繼續加油！';
+            summaryEl.innerHTML=msg;
+            summaryEl.className='w-full bg-slate-100 border-4 border-slate-300 rounded-2xl p-5 mb-4 text-left font-bold text-lg leading-relaxed text-slate-700';
+        }
+        // 新功能三：各類型答對統計卡片
+        const typeStats=document.getElementById('b1-type-stats');
+        if(typeStats){
+            const t=this.totalByType||{}, c=this.correctByType||{};
+            const rows=[
+                {key:'danger',   label:'🛑 危險訊息', color:'text-red-600',   bg:'bg-red-50'},
+                {key:'suspicious',label:'🔍 可疑訊息', color:'text-yellow-700',bg:'bg-yellow-50'},
+                {key:'credible', label:'✅ 可信訊息', color:'text-green-700', bg:'bg-green-50'},
+            ];
+            let html='<div class="bg-white border-4 border-slate-300 rounded-2xl p-4 text-left"><div class="font-black text-slate-700 mb-3 text-base">📊 這次各類型成績</div>';
+            rows.forEach(r=>{
+                const tot=t[r.key]||0, cor=c[r.key]||0;
+                const badge=cor===tot&&tot>0?'✅':'📚';
+                html+=`<div class="flex items-center justify-between ${r.bg} rounded-xl px-3 py-2 mb-2">
+                    <span class="font-bold text-slate-700">${r.label}</span>
+                    <span class="${r.color} font-black">${badge} ${cor}/${tot}</span>
+                </div>`;
+            });
+            html+='</div>';
+            typeStats.innerHTML=html;
+        }
+    }, // endGame 結束
+    resetToStart:function(){
+        clearInterval(this.timerId);
+        document.getElementById('b1-screen-end').classList.add('global-hidden');
+        document.getElementById('b1-screen-game').classList.add('global-hidden');
+        document.getElementById('b1-hud').classList.add('global-hidden');
+        document.getElementById('b1-feedback-popup').classList.add('global-hidden');
+    },
+    // 新功能A：複製本局成績給家長，延伸家庭互動學習
+    copyScore:function(){
+        const btn=document.getElementById('b1-copy-score-btn');
+        // 【修正2】原 'b1-end-rank' 在 DOM 中不存在，應改為 'b1-rank-title'
+        //   → 修正前家長收到的等級永遠是 fallback「偵探」
+        const rankEl=document.getElementById('b1-rank-title');
+        const rankName=rankEl?rankEl.textContent.trim():'偵探';
+        // 【修正8】加入後測最高成績：若玩家已挑戰過後冊（b2Best >= 0）則附上該分數
+        //   讓家長一次掌握前測＋後測兩項進度
+        const b2Best=(typeof getBest==='function')?getBest('b2'):-1;
+        const lines=[
+            '📖 我在「假訊息小偵探」前測答對了 '+this.b1Correct+'/10 題！',
+            '🕵️ 偵探等級：'+rankName,
+            '🔥 最高連勝：'+this.maxCombo+' 題！'
+        ];
+        if(b2Best>=0){
+            lines.push('📗 後測最高成績：'+b2Best+'/10 題！');
+        }
+        lines.push('快來挑戰看看你能答對幾題！🕵️');
+        const text=lines.join('\n');
+        const restore=()=>{ if(btn) btn.innerHTML='📋 複製成績給爸媽！'; };
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+            navigator.clipboard.writeText(text).then(()=>{
+                if(btn) btn.innerHTML='✅ 已複製！';
+                setTimeout(restore,1500);
+            }).catch(()=>{ prompt('請手動複製以下文字：',text); });
+        } else {
+            prompt('請手動複製以下文字：',text);
+        }
+    },
+    // 修改二：血量歸零時的失敗結算流程
+    gameOver:function(){
+        clearInterval(this.timerId);
+        // 【新增】血量歸零時也記錄本局題目，避免下局一直重複看過的題目
+        recordRecentDeck(this.b1CurrentDeck);
+        // Bug1修正：移除重複音效，judgeAnswer 已播 wrong/timeout，此處只停 BGM
+        window.SharedAudio.stopGameBGM();
+        // Bug2修正：血量歸零後禁用朗讀按鈕，避免異常觸發
+        const speakBtnGO=document.getElementById('b1-speak-btn');
+        if(speakBtnGO){speakBtnGO.style.opacity='0.3';speakBtnGO.style.pointerEvents='none';}
+        // 全螢幕紅色閃光特效
+        const flash=document.createElement('div');
+        flash.className='screen-flash-wrong';
+        document.body.appendChild(flash);
+        setTimeout(()=>flash.remove(),750);
+        // 切換到結算畫面
+        document.getElementById('b1-screen-game').classList.add('global-hidden');
+        document.getElementById('b1-hud').classList.add('global-hidden');
+        document.getElementById('b1-feedback-popup').classList.add('global-hidden');
+        document.getElementById('b1-screen-end').classList.remove('global-hidden');
+        // 顯示「偵探能量用盡」橫幅
+        const banner=document.getElementById('b1-gameover-banner');
+        if(banner) banner.style.display='block';
+        // 填入分數資料
+        document.getElementById('b1-end-correct').textContent=this.b1Correct;
+        document.getElementById('b1-end-combo').textContent=this.maxCombo;
+        updateRankCard('b1',this.b1Correct);
+        checkAndSaveBest('b1',this.b1Correct);
+        updateHubBestScores();
+        // 填入各類型統計
+        const typeStats=document.getElementById('b1-type-stats');
+        if(typeStats){
+            const t=this.totalByType||{}, c=this.correctByType||{};
+            const rows=[
+                {key:'danger',   label:'🛑 危險訊息', color:'text-red-600',   bg:'bg-red-50'},
+                {key:'suspicious',label:'🔍 可疑訊息', color:'text-yellow-700',bg:'bg-yellow-50'},
+                {key:'credible', label:'✅ 可信訊息', color:'text-green-700', bg:'bg-green-50'},
+            ];
+            let html='<div class="bg-white border-4 border-slate-300 rounded-2xl p-4 text-left"><div class="font-black text-slate-700 mb-3 text-base">📊 這次各類型成績</div>';
+            rows.forEach(r=>{
+                const tot=t[r.key]||0, cor=c[r.key]||0;
+                const badge=cor===tot&&tot>0?'✅':'📚';
+                html+=`<div class="flex items-center justify-between ${r.bg} rounded-xl px-3 py-2 mb-2"><span class="font-bold text-slate-700">${r.label}</span><span class="${r.color} font-black">${badge} ${cor}/${tot}</span></div>`;
+            });
+            html+='</div>';
+            typeStats.innerHTML=html;
+        }
+        // UX4修正：解鎖答題按鈕，確保「再挑戰一次」可點擊
+        const btnRowGO=document.querySelector('.b1-btn-row');
+        if(btnRowGO) btnRowGO.style.pointerEvents='';
+        const nextBtnGO=document.getElementById('b1-next-question-btn');
+        if(nextBtnGO){nextBtnGO.style.visibility='visible';nextBtnGO.disabled=false;}
+        // UX5修正：血量歸零時隱藏「去試試後冊！」，優先鼓勵重練前冊
+        const gotoB2=document.getElementById('b1-goto-b2-btn');
+        if(gotoB2) gotoB2.style.display='none';
+    },
+    stopGame:function(){clearInterval(this.timerId);}
+};
+
+// ===== Game 2 =====
+window.AppGame2 = {
+    QUESTION_COUNT:10,
+    responseTimes:[],       // 新功能C：每題的思考秒數
+    _questionStartTime:0,   // 新功能C：每題選項出現的 timestamp
+    b2Questions:[
+        // 學校群組 (5題)
+        {difficulty:1,category:'school',groupIcon:'🏫',groupName:'班級群組',messages:[{sender:'同學A',text:'快看這張圖！明天颱風放假一天！不用上學啦！'}],options:[{text:'馬上轉傳給其他班同學',isCorrect:false},{text:'去學校官網看正式公告',isCorrect:true},{text:'先問其他同學是不是真的',isCorrect:false}],explanation:'學校放假的消息要看學校官網才算數！',keyPoint:'學校大事要看官網！',actionTip:'去學校網站確認最安全！'},
+        {difficulty:2,category:'school',groupIcon:'👩‍🏫',groupName:'班級聯絡網',messages:[{sender:'老師(看起來怪怪的)',text:'老師帳號怪怪的，請把你的名字和生日傳給我確認！'}],options:[{text:'是老師說的當然給',isCorrect:false},{text:'明天到學校當面問老師',isCorrect:true},{text:'先傳給好朋友看看',isCorrect:false}],explanation:'真的老師不會用訊息要你的資料，這是假的！',keyPoint:'網路上要個人資料的都要小心！',actionTip:'當面問老師最安全！'},
+        {difficulty:1,category:'school',groupIcon:'🏫',groupName:'校園群組',messages:[{sender:'隔壁班小明',text:'聽說我們下個月的校外教學取消了！大家快傳！'}],options:[{text:'好難過，趕快轉傳給大家',isCorrect:false},{text:'等學校發正式通知單',isCorrect:true},{text:'先傳給好朋友看看',isCorrect:false}],explanation:'學校的事情要等正式通知，「聽說」不能信！',keyPoint:'沒證據的傳言別亂傳！',actionTip:'等老師發正式通知再說！'},
+        {difficulty:1,category:'school',groupIcon:'🏫',groupName:'同學聊天室',messages:[{sender:'同學B',text:'有人說明天督學要來抓沒寫作業的同學，會被記大過！'}],options:[{text:'好可怕，轉傳給全班小心',isCorrect:false},{text:'這是嚇人的謠言，不理它',isCorrect:true},{text:'去其他群組問問看',isCorrect:false}],explanation:'太誇張的傳說通常是假的，記大過更不可能！',keyPoint:'太誇張的話通常是假的！',actionTip:'動動腦想一想，別被嚇到！'},
+        {difficulty:1,category:'school',groupIcon:'🏫',groupName:'班級群組',messages:[{sender:'匿名',text:'某某老師被抓到偷東西！大家快傳！'}],options:[{text:'馬上截圖傳給好朋友',isCorrect:false},{text:'不認識的人造謠不要信，不要傳',isCorrect:true},{text:'先在群組問大家',isCorrect:false}],explanation:'不知道是誰說的話可能是亂講，亂傳會傷害老師！',keyPoint:'匿名的爆料不要信也不要傳！',actionTip:'別當造謠小幫手，直接略過！'},
+
+        // 家族群 (5題)
+        // 【修正4-a】把「肚子痛死掉」改為「肚子痛到送醫院」、explanation「不會死掉」改為「不會這樣」
+        //   原因：國小一年級兒童對「死」字敏感，容易引發不必要焦慮；
+        //   「送醫院」已足夠表達誇張性，維持假訊息辨識的教學效果
+        {difficulty:1,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家族群',messages:[{sender:'大伯',text:'警告！吃糖果配可樂會肚子痛到送醫院！以後千萬不要這樣吃！'}],options:[{text:'天啊太可怕，趕快轉傳給大家',isCorrect:false},{text:'告訴大伯這是假的，不需要這樣擔心',isCorrect:true},{text:'跟著留言說超可怕的',isCorrect:false}],explanation:'糖果配可樂不會這樣，這是嚇人的假訊息！',keyPoint:'太誇張的食物警告通常是假的！',actionTip:'告訴大伯這是假消息！'},
+        {difficulty:1,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家族群',messages:[{sender:'阿嬤',text:'每天喝這個神奇草藥水，保證不用看醫生，百病全消！'}],options:[{text:'阿嬤很關心，天天喝',isCorrect:false},{text:'提醒阿嬤生病要看醫生',isCorrect:true},{text:'試喝看看，反正沒害處',isCorrect:false}],explanation:'沒有東西可以治百病，這種說法是騙人的！',keyPoint:'說可以治百病的都是假的！',actionTip:'提醒阿嬤生病要看醫生才對！'},
+        {difficulty:2,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家庭群組',messages:[{sender:'媽媽',text:'我收到一個訊息說：「點連結免費送你超大盒樂高！限時 10 分鐘！」，這個可以點嗎？'}],options:[{text:'太棒了！快點連結給我！',isCorrect:false},{text:'告訴媽媽這是假的，不要點',isCorrect:true},{text:'幫媽媽先點開看看',isCorrect:false}],explanation:'免費送大禮物的連結，通常是壞人設的陷阱！',keyPoint:'免費大禮物的奇怪連結不要點！',actionTip:'告訴媽媽直接刪掉這個訊息！'},
+        {difficulty:1,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家族群',messages:[{sender:'阿公',text:'這個影片說每天喝鹽水可以預防生病！幾百萬人分享！'}],options:[{text:'好多人分享一定是真的',isCorrect:false},{text:'告訴阿公這沒有醫學根據，去問醫生',isCorrect:true},{text:'試試看反正鹽水沒害',isCorrect:false}],explanation:'分享很多人不代表是真的，健康事情要問醫生！',keyPoint:'人多分享不代表是對的！',actionTip:'告訴阿公健康要問醫生！'},
+        {difficulty:1,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家族群',messages:[{sender:'爸爸',text:'（衛生所通知）最近流感盛行，請大家戴口罩、勤洗手！'}],options:[{text:'這一定是假的，不理',isCorrect:false},{text:'這是衛生所說的，要乖乖照做',isCorrect:true},{text:'覺得麻煩，假裝沒看到',isCorrect:false}],explanation:'衛生所的健康提醒是真的，要好好遵守！',keyPoint:'政府的健康提醒要照做！',actionTip:'收到要乖乖戴口罩洗手！'},
+
+        // 遊戲/網路 (4題)
+        {difficulty:2,category:'game',groupIcon:'🎮',groupName:'遊戲好友群',messages:[{sender:'遊戲朋友',text:'點這個連結，輸入帳號密碼就能領免費限定造型！'}],options:[{text:'太棒了，馬上輸入帳密',isCorrect:false},{text:'不要點連結，直接忽略',isCorrect:true},{text:'用假帳號登入看看',isCorrect:false}],explanation:'真的遊戲不會用奇怪網站送造型，這會偷你的帳號！',keyPoint:'要密碼送東西絕對是騙人的！',actionTip:'不要點，告訴爸媽！'},
+        {difficulty:2,category:'game',groupIcon:'📱',groupName:'網路訊息',messages:[{sender:'陌生人',text:'恭喜你抽中 iPhone！先付 100 元運費就寄給你！'}],options:[{text:'好便宜，馬上付錢',isCorrect:false},{text:'封鎖他，告訴爸媽',isCorrect:true},{text:'先付一點點看看',isCorrect:false}],explanation:'真的中獎不會叫你先付錢，這 100% 是詐騙！',keyPoint:'要先付錢的獎品是騙人的！',actionTip:'封鎖他並告訴爸媽！'},
+        {difficulty:2,category:'game',groupIcon:'🎮',groupName:'遊戲好友',messages:[{sender:'同班同學',text:'我的帳號怪怪的，把你手機收到的數字傳給我幫我解決！'}],options:[{text:'同學需要幫忙，馬上給',isCorrect:false},{text:'打電話告訴同學他帳號被盜了',isCorrect:true},{text:'問他為什麼要這個數字',isCorrect:false}],explanation:'同學的帳號可能被壞人控制了，給數字就會被盜！',keyPoint:'手機收到的數字不能給別人！',actionTip:'打電話告訴同學要改密碼！'},
+        {difficulty:1,category:'game',groupIcon:'📱',groupName:'群組訊息',messages:[{sender:'陌生人',text:'我可以幫你的遊戲快速升等！只要把帳號密碼給我就好！'}],options:[{text:'升等很快，給他試試',isCorrect:false},{text:'不行！帳號給別人就會被偷',isCorrect:true},{text:'先給他看，不對再改密碼',isCorrect:false}],explanation:'帳號給別人就會被偷走，再也拿不回來！',keyPoint:'遊戲帳號絕對不能給任何人！',actionTip:'自己慢慢玩才最安全！'},
+
+        // 社群/影片 (3題) + 【新增3題→共6題】
+        //   新增原因：social 原只有3題，每局10題抽選時嚴重偏少；
+        //   補充3道覆蓋「網路謠言截圖」「LINE 假好康」「個資外洩留言」新場景
+        {difficulty:2,category:'social',groupIcon:'📱',groupName:'同學聊天室',messages:[{sender:'同學',text:'看這個 5 秒短影片，那個男生推人！大家去他影片下面罵他！'}],options:[{text:'太過分了，我去留言罵',isCorrect:false},{text:'告訴同學先看清楚再決定',isCorrect:true},{text:'跟著大家一起留言',isCorrect:false}],explanation:'5 秒太短了，可能前後發生什麼事都不知道，跟著罵會變網路霸凌！',keyPoint:'短影片容易誤會，別急著罵！',actionTip:'先弄清楚整件事再說！'},
+        {difficulty:1,category:'social',groupIcon:'💬',groupName:'朋友群組',messages:[{sender:'同學',text:'這是魔法信！不在 10 分鐘內傳給 10 個人，你就會倒大楣！'}],options:[{text:'好可怕，趕快傳出去',isCorrect:false},{text:'這是嚇唬人的，直接刪除',isCorrect:true},{text:'怕怕的，傳給 5 個就好',isCorrect:false}],explanation:'這種「不傳會倒楣」的訊息全部都是嚇唬人，不會發生壞事！',keyPoint:'嚇唬人的連鎖信都是假的！',actionTip:'直接刪掉，什麼事都不會發生！'},
+        // 【修正4-b】原：「觸電、火災甚至死亡」→ 改為「被電到送醫院，甚至引發火災」
+        {difficulty:2,category:'social',groupIcon:'📱',groupName:'流行群',messages:[{sender:'網友',text:'最新挑戰！把硬幣插進插座，會有超炫的火花喔！'}],options:[{text:'好玩，馬上去客廳試',isCorrect:false},{text:'這超級危險！絕對不能學',isCorrect:true},{text:'先收藏影片晚點再看',isCorrect:false}],explanation:'插座是很危險的東西，這樣做會被電到送醫院，甚至引發火災，非常危險！',keyPoint:'網路的危險挑戰絕對不能學！',actionTip:'自己不學，也要阻止朋友！'},
+        // 【social 新增1】截圖謠言：同學被說做壞事
+        {difficulty:2,category:'social',groupIcon:'📸',groupName:'班級聊天室',messages:[{sender:'同學C',text:'我截圖到一個訊息說班上某某同學在外面欺負小朋友，大家快傳！'}],options:[{text:'馬上截圖傳給其他同學看',isCorrect:false},{text:'只有截圖沒有證據，不要亂傳',isCorrect:true},{text:'去問那個同學是不是真的再說',isCorrect:false}],explanation:'一張截圖很容易被偽造，亂傳會傷害同學，變成網路霸凌的幫手！',keyPoint:'截圖不等於真相，別當謠言幫手！',actionTip:'不傳、不讚、不轉分享！'},
+        // 【social 新增2】假好康分享：LINE 分享抽獎
+        {difficulty:1,category:'social',groupIcon:'💬',groupName:'同學群組',messages:[{sender:'同學D',text:'快！分享這個連結給 5 個好友就能抽到 Switch！我剛分享完等你一起！'}],options:[{text:'好快分享，一起抽！',isCorrect:false},{text:'這是假的，分享也不會有獎品',isCorrect:true},{text:'先分享看看，反正沒損失',isCorrect:false}],explanation:'「分享給朋友就送獎品」是常見騙術，分享後只會讓更多人被騙！',keyPoint:'要分享才能得獎的都是假的！',actionTip:'告訴同學這是假的，不要分享！'},
+        // 【social 新增3】個資留言陷阱
+        {difficulty:2,category:'social',groupIcon:'📱',groupName:'班級群組',messages:[{sender:'陌生帳號',text:'同學們好！請在這裡留言你的名字和就讀學校，讓我們認識彼此！'}],options:[{text:'好啊，留下名字和學校',isCorrect:false},{text:'陌生帳號要個資，不要回答',isCorrect:true},{text:'只留名字應該沒關係吧',isCorrect:false}],explanation:'陌生人收集名字和學校資料，可能是壞人想找到你！',keyPoint:'不認識的人不給個人資料！',actionTip:'告訴爸媽這個奇怪帳號！'},
+
+        // 新聞/查證 (3題) + 【新增3題→共6題】
+        //   新增原因：news 原只有3題且全是 diff=2；
+        //   補充3道新場景並加入 diff=1，讓難度遞進更自然
+        {difficulty:2,category:'news',groupIcon:'🖼️',groupName:'家族群',messages:[{sender:'家人',text:'（一張淹水的圖）聽說今天附近淹大水！（沒寫日期地點）'}],options:[{text:'太嚴重了，趕快轉傳',isCorrect:false},{text:'問家人這是什麼時候哪裡的照片',isCorrect:true},{text:'先問朋友家附近有沒有淹水',isCorrect:false}],explanation:'這張可能是好幾年前或別的國家的舊照片！',keyPoint:'驚人照片要先問時間地點！',actionTip:'先問清楚再決定要不要相信！'},
+        {difficulty:2,category:'news',groupIcon:'📷',groupName:'家族群',messages:[{sender:'阿姨',text:'有人傳一張橋斷掉的照片，但最近沒聽說有地震耶？'}],options:[{text:'有照片就是真的，趕快傳',isCorrect:false},{text:'這可能是很久以前或別國的舊照片',isCorrect:true},{text:'反正不確定，傳給好朋友看',isCorrect:false}],explanation:'有人會拿舊照片騙人說是現在發生的事，要看清楚！',keyPoint:'看照片要看是不是最近的！',actionTip:'告訴阿姨可能是舊照片，先別傳！'},
+        {difficulty:1,category:'news',groupIcon:'📺',groupName:'新聞群',messages:[{sender:'同學',text:'有人傳新聞截圖說明天會下大雪，台灣會結冰！'}],options:[{text:'趕快買十件外套準備',isCorrect:false},{text:'去氣象局 APP 看天氣最準',isCorrect:true},{text:'轉傳到家族群問大家',isCorrect:false}],explanation:'新聞截圖很容易被改字騙人，天氣要看氣象局！',keyPoint:'天氣消息看氣象局最準！',actionTip:'打開氣象局 APP 確認天氣！'},
+        // 【news 新增1】假新聞標題：誇張食物謠言
+        {difficulty:1,category:'news',groupIcon:'📰',groupName:'家族群',messages:[{sender:'阿公',text:'看這個新聞標題！說：「科學家發現吃巧克力可以變聰明！吃越多越好！」'}],options:[{text:'哇真的嗎！快去買巧克力',isCorrect:false},{text:'這種說法太誇張，要去找正式醫學報告查',isCorrect:true},{text:'轉傳給同學一起吃',isCorrect:false}],explanation:'誇張又太好聽的新聞標題，通常是假的！真正的健康資訊要看醫生或政府機構說的！',keyPoint:'太誇張的標題先不要相信！',actionTip:'告訴阿公要找正式醫學資料確認！'},
+        // 【news 新增2】網路謠言：AI 產生的假照片
+        {difficulty:2,category:'news',groupIcon:'🤖',groupName:'同學群組',messages:[{sender:'同學E',text:'看！這張照片說是今天台灣發生的大事，但感覺照片有點怪怪的⋯'}],options:[{text:'有照片就是真的，馬上傳',isCorrect:false},{text:'照片怪怪的可能是 AI 做的假照片，先查查看',isCorrect:true},{text:'傳給爸媽問他們知不知道',isCorrect:false}],explanation:'現在有 AI 可以做出很逼真的假照片，覺得怪怪的要去可信任的新聞網站確認！',keyPoint:'AI 假照片越來越多，要會辨別！',actionTip:'去大電視台官網查有沒有這條新聞！'},
+        // 【news 新增3】查核資源：知道去哪裡查
+        {difficulty:1,category:'news',groupIcon:'🔍',groupName:'家庭群',messages:[{sender:'媽媽',text:'有人說最近有個很可怕的新病毒在流行，傳得很誇張，不知道是真的嗎？'}],options:[{text:'這麼多人說一定是真的，趕快準備',isCorrect:false},{text:'去衛生福利部官網或疾管署查最準',isCorrect:true},{text:'先轉傳讓大家知道',isCorrect:false}],explanation:'健康和疾病的消息，要去政府的衛生福利部或疾管署官網查，才不會被假消息嚇到！',keyPoint:'健康消息去官方網站查！',actionTip:'幫媽媽一起去衛生福利部官網確認！'},
+
+        // 學校補充 (3題)
+        {difficulty:1,category:'school',groupIcon:'🏫',groupName:'班級群組',messages:[{sender:'同學小花',text:'我聽說下週的校外教學去動物園，大家帶零食去吧！'}],options:[{text:'好耶，我帶一大包零食去',isCorrect:false},{text:'等學校發正式通知單再說',isCorrect:true},{text:'問問其他同學是不是真的',isCorrect:false}],explanation:'校外教學的目的地要等學校的正式通知單！',keyPoint:'聽說的消息要等正式通知！',actionTip:'等老師發通知單再決定！'},
+        {difficulty:2,category:'school',groupIcon:'🏫',groupName:'班級群',messages:[{sender:'不明帳號',text:'各位同學！今天下午第5節是體育課，不用帶課本！'}],options:[{text:'太好了，不帶課本去上學',isCorrect:false},{text:'先問老師或看課表確認',isCorrect:true},{text:'如果同學都說真的就相信',isCorrect:false}],explanation:'課程異動只有老師才能宣布，不明帳號說的不算！',keyPoint:'課程變動要問老師才算！',actionTip:'直接問老師是最安全的！'},
+        {difficulty:1,category:'school',groupIcon:'🏫',groupName:'同學群',messages:[{sender:'同學A',text:'我發現一個超強的考試作弊方法，要不要分享給你？'}],options:[{text:'好啊，先聽聽看！',isCorrect:false},{text:'作弊是不對的，謝謝你但我不要',isCorrect:true},{text:'叫他傳給全班一起用',isCorrect:false}],explanation:'作弊是不誠實的行為，而且可能被記過！',keyPoint:'作弊不對，要靠自己努力！',actionTip:'拒絕並告訴他作弊不對！'},
+
+        // 家庭補充 (3題)
+        {difficulty:1,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家族群',messages:[{sender:'表哥',text:'我看到一個文章說：睡前玩手機一小時，眼睛會更健康！'}],options:[{text:'太棒了，以後睡前都要玩手機',isCorrect:false},{text:'這不對，睡前玩手機會傷眼睛',isCorrect:true},{text:'有點懷疑，但還是試試看吧',isCorrect:false}],explanation:'睡前玩手機會傷害眼睛和影響睡眠，文章是假的！',keyPoint:'跟健康相反的說法通常是假的！',actionTip:'告訴表哥這不對，睡前要放下手機！'},
+        {difficulty:2,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家庭群組',messages:[{sender:'爸爸',text:'剛收到一個很好笑的影片，說明星真的是外星人！要轉傳給大家看！'}],options:[{text:'真的假的！趕快傳給班上同學',isCorrect:false},{text:'告訴爸爸這是搞笑誇張的假消息',isCorrect:true},{text:'跟爸爸說應該是真的，因為很多人看',isCorrect:false}],explanation:'這是搞笑誇張的假消息，不是真的報導！',keyPoint:'搞笑誇張的標題通常是假的！',actionTip:'告訴爸爸這是玩笑，不要傳出去！'},
+        {difficulty:1,category:'family',groupIcon:'👨‍👩‍👧‍👦',groupName:'家族群',messages:[{sender:'姑姑',text:'有人說喝這個牌子的水，喝了一個月身體會變超強！你也叫媽媽買！'}],options:[{text:'馬上叫媽媽去買',isCorrect:false},{text:'告訴姑姑普通水就很好，不用特別的',isCorrect:true},{text:'試喝看看反正水不會怎樣',isCorrect:false}],explanation:'普通乾淨的水就是最好的飲料，不需要特別的神奇水！',keyPoint:'說喝了會變強的飲料通常是假的！',actionTip:'告訴姑姑不需要買，喝白開水最好！'},
+
+        // 遊戲/網路補充 (2題)
+        {difficulty:2,category:'game',groupIcon:'🎮',groupName:'遊戲群',messages:[{sender:'網路玩家',text:'我可以教你怎麼讓遊戲角色變無敵，但你要先加我LINE！'}],options:[{text:'馬上加他LINE！',isCorrect:false},{text:'不要，加陌生人LINE很危險',isCorrect:true},{text:'先加看看，不對再刪除',isCorrect:false}],explanation:'不認識的人要你加LINE，可能是壞人！',keyPoint:'不認識的人不要隨便加LINE！',actionTip:'拒絕他並告訴爸媽！'},
+        {difficulty:2,category:'game',groupIcon:'📱',groupName:'網路訊息',messages:[{sender:'陌生帳號',text:'你今天是我們的第 100 萬個訪客！點這裡領取神秘大獎！'}],options:[{text:'好幸運！馬上點擊領獎！',isCorrect:false},{text:'這是假的，直接關掉',isCorrect:true},{text:'先看看是什麼獎再決定',isCorrect:false}],explanation:'「第 100 萬個訪客」是騙人的假中獎，點了會有問題！',keyPoint:'莫名其妙的中獎通知都是假的！',actionTip:'直接關掉，告訴爸媽！'},
+    ],
+
+    currentQuestions:[],currentIndex:0,score:0,wrongQuestions:[],
+
+    updateClock:function(){ const now=new Date(),el=document.getElementById('b2-clock'); if(el)el.innerText=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`; },
+
+    startGame:function(){
+        window.SharedAudio.playSFX('click');
+        document.getElementById('main-hub').classList.add('global-hidden');
+        document.getElementById('game2-wrapper').classList.remove('global-hidden');
+        document.getElementById('b2-end-view').classList.remove('active');
+        document.getElementById('b2-chat-view').classList.add('active');
+        this.score=0; this.wrongQuestions=[]; this.currentIndex=0; this.isPaused=false;
+        // 【Bug1修正】補上 _retryMode / _retryScenario 重置：
+        //   若上一局玩家進入重練模式（retrySingleQuestion）後直接點「再挑戰一次」，
+        //   _retryMode 仍為 true，speakScenario 會去讀 _retryScenario（上局的題目），
+        //   導致新局開始時朗讀按鈕播放錯誤題目，且第一題永遠被舊題蓋掉
+        this._retryMode=false;
+        this._retryScenario=null;
+        this.safeCombo=0; // 新功能二：重置連續安全回應計數
+        // 新功能C：重置思考時間記錄
+        this.responseTimes=[];
+        this._questionStartTime=0;
+        // Bug3修正：重置答對率顯示，避免殘留上一局數字
+        const accEl=document.getElementById('b2-accuracy');
+        if(accEl)accEl.textContent='';
+        // 修正二：重置後冊結算橫幅，避免上一局殘留
+        const b2Banner=document.getElementById('b2-result-banner');
+        if(b2Banner){ b2Banner.style.display='none'; b2Banner.className='b2-result-banner'; }
+        // 修正四：startGame 也啟動 BGM（包含「再挑戰一次」的情況）
+        window.SharedAudio.stopAllBGM();
+        if(!window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+            setTimeout(()=>{ window.SharedAudio.startGameBGM(); window.SharedAudio.setGameTension(0.3); }, 300);
+        }
+        const grouped={};
+        this.b2Questions.forEach(q=>{ if(!grouped[q.category])grouped[q.category]=[]; grouped[q.category].push(q); });
+        let selected=[];
+        const categories=Object.keys(grouped);
+        categories.forEach(cat=>{ let s=shuffle([...grouped[cat]]); selected.push(s.pop()); grouped[cat]=s; });
+        let remaining=[];
+        categories.forEach(cat=>{ remaining=remaining.concat(grouped[cat]); });
+        remaining=shuffle(remaining);
+        const needed=this.QUESTION_COUNT-selected.length;
+        if(needed>0)selected=selected.concat(remaining.slice(0,needed));
+        let final=shuffle(selected);
+        final.forEach(q=>{ q.options=shuffle([...q.options]); });
+        this.currentQuestions=final;
+        this.updateClock();
+        this.loadScenario();
+    },
+
+    loadScenario:function(){
+        // 功能五：恢復選項可點擊
+        const optsArea=document.getElementById('b2-options-area');
+        if(optsArea) optsArea.style.pointerEvents='';
+        const s=this.currentQuestions[this.currentIndex];
+        document.getElementById('b2-ui-group-name').innerText=`${s.groupIcon} ${s.groupName}`;
+        document.getElementById('b2-ui-progress').innerText=`${this.currentIndex+1} / ${this.QUESTION_COUNT}`;
+        // 優化5: 難度標籤
+        const chatHistory=document.getElementById('b2-chat-history');
+        chatHistory.innerHTML='';
+        // 難度標籤放在聊天內容最上方
+        const diff=s.difficulty||1;
+        const diffText=diff===3?'⭐⭐⭐ 高手':diff===2?'⭐⭐ 進階':'⭐ 基礎';
+        chatHistory.innerHTML=`<span class="b2-difficulty-badge">${diffText}</span>`;
+        document.getElementById('b2-feedback-area').style.display='none';
+        // 修正三：等待期間在選項區顯示「思考中」提示
+        const optsAreaInit=document.getElementById('b2-options-area');
+        optsAreaInit.innerHTML='<div id="b2-thinking-hint" style="text-align:center;color:#94a3b8;font-weight:bold;font-size:0.95rem;padding:12px;">🤔 訊息傳來了，想想看怎麼回應...</div>';
+        optsAreaInit.style.display='flex';
+        s.messages.forEach((msg, idx)=>{
+            const typingId='b2-typing-'+idx;
+            chatHistory.innerHTML+=`<div class="msg-row msg-left typing-row" id="${typingId}">
+                <div class="avatar shadow-sm">${msg.sender.charAt(0)}</div>
+                <div class="msg-content">
+                    <div class="sender-name">${msg.sender}</div>
+                    <div class="msg-bubble typing-bubble">
+                        <span class="typing-dots"><span>•</span><span>•</span><span>•</span></span>
+                    </div>
+                </div>
+            </div>`;
+        });
+        chatHistory.scrollTop=chatHistory.scrollHeight;
+
+        // 1.2 秒後把 typing 換成真正的訊息（儲存 ID 以便暫停時取消）
+        if(this._typingTimer) clearTimeout(this._typingTimer);
+        this._typingTimer = setTimeout(()=>{
+            if(this.isPaused) return; // 暫停中不執行
+            chatHistory.innerHTML='';
+            s.messages.forEach(msg=>{
+                chatHistory.innerHTML+=`<div class="msg-row msg-left"><div class="avatar shadow-sm">${msg.sender.charAt(0)}</div><div class="msg-content"><div class="sender-name">${msg.sender}</div><div class="msg-bubble">${msg.text}</div></div></div>`;
+            });
+            window.SharedAudio.playSFX('msg');
+            chatHistory.innerHTML+=`<div class="b2-system-prompt">💡 遇到這個情況你會怎麼做？</div>`;
+            const optsArea=document.getElementById('b2-options-area');
+            optsArea.innerHTML='';
+            optsArea.style.display='flex';
+            s.options.forEach(opt=>{
+                const btn=document.createElement('button');
+                btn.className='option-btn hover:bg-blue-50';
+                btn.innerText=opt.text;
+                const sr=s;
+                btn.onclick=()=>window.AppGame2.selectOption(opt,sr);
+                optsArea.appendChild(btn);
+            });
+            chatHistory.scrollTop=chatHistory.scrollHeight;
+            // 新功能C：選項出現時記錄開始思考的時間
+            this._questionStartTime=Date.now();
+        }, 1200);
+    },
+
+    selectOption:function(selectedOpt,scenario){
+        // 功能五：防呆 - 立刻鎖定選項防止連點
+        const optsArea=document.getElementById('b2-options-area');
+        if(optsArea) optsArea.style.pointerEvents='none';
+        // 新功能C：記錄本題思考時間（毫秒轉秒，四捨五入）
+        if(this._questionStartTime>0){
+            const sec=Math.round((Date.now()-this._questionStartTime)/1000);
+            this.responseTimes.push(sec);
+            this._questionStartTime=0;
+        }
+        window.SharedAudio.playSFX('click');
+        optsArea.style.display='none';
+        const chatHistory=document.getElementById('b2-chat-history');
+        chatHistory.innerHTML+=`<div class="msg-row msg-right"><div class="msg-content"><div class="sender-name">我</div><div class="msg-bubble">${selectedOpt.text}</div></div><div class="avatar shadow-sm" style="background-color:#bae6fd;">我</div></div>`;
+        chatHistory.scrollTop=chatHistory.scrollHeight;
+        if(selectedOpt.isCorrect){
+            this.score++;
+            // 新功能二：連續安全回應計數
+            this.safeCombo=(this.safeCombo||0)+1;
+            if(this.safeCombo===3){
+                // 連續 3 次安全回應，在聊天室插入獎勵橫幅
+                const chatHistory=document.getElementById('b2-chat-history');
+                chatHistory.innerHTML+=`<div style="background:#bbf7d0;border:3px solid #1e293b;border-radius:16px;padding:10px 16px;font-size:1.05rem;font-weight:900;color:#14532d;text-align:center;box-shadow:3px 3px 0 #1e293b;margin:6px 0;">🛡️ 連續 3 次安全回應！你是資訊防護高手！</div>`;
+                chatHistory.scrollTop=chatHistory.scrollHeight;
+                window.SharedAudio.playSFX('correct');
+            }
+        } else {
+            this.safeCombo=0; // 答錯重置連勝
+            const ca=scenario.options.find(o=>o.isCorrect).text;
+            this.wrongQuestions.push({question:scenario.messages[0].text,myAnswer:selectedOpt.text,correctAnswer:ca,keyPoint:scenario.keyPoint,actionTip:scenario.actionTip,scenario:scenario});
+        }
+        const sr=scenario;
+        setTimeout(()=>window.AppGame2.showFeedback(selectedOpt.isCorrect,sr),600);
+    },
+
+    showFeedback:function(isCorrect,scenario){
+        const feedbackArea=document.getElementById('b2-feedback-area');
+        const feedbackCard=document.getElementById('b2-feedback-card');
+        const title=document.getElementById('b2-feedback-title');
+        const text=document.getElementById('b2-feedback-text');
+        const detectiveText=document.getElementById('b2-detective-text');
+        const nextBtn=document.getElementById('b2-next-btn');
+        feedbackArea.style.display='flex';
+        feedbackCard.classList.remove('b2-correct','b2-wrong');
+
+        // 優化三：全螢幕閃光效果
+        const app=document.getElementById('b2-app-container');
+        const flash=document.createElement('div');
+        flash.className='flash-overlay';
+        flash.style.background=isCorrect?'rgba(34,197,94,0.35)':'rgba(239,68,68,0.35)';
+        app.appendChild(flash);
+        setTimeout(()=>flash.remove(),500);
+
+        // 優化四：大 emoji + 一句話
+        const correctEmojis=['🎉','⭐','🏅','💪','🎯'];
+        const correctWords=['答對啦！','太厲害了！','你真的懂！','超強的！','正確！'];
+        const wrongEmojis=['😅','🤔','💪','📚','🔍'];
+        const wrongWords=['記起來了嗎？','下次會更好！','再想一想！','沒關係！','學到了！'];
+        const ri=Math.floor(Math.random()*5);
+        const bigEmoji=isCorrect?correctEmojis[ri]:wrongEmojis[ri];
+        const bigWord=isCorrect?correctWords[ri]:wrongWords[ri];
+
+        if(isCorrect){
+            window.SharedAudio.playSFX('correct');
+            feedbackCard.classList.add('b2-correct');
+            title.innerHTML='✅ 安全過關！';
+            text.innerHTML=`這個回應很聰明喔！<br><span class="text-sm">${scenario.explanation}</span>`;
+            detectiveText.innerHTML=`
+                <div style="text-align:center;margin-bottom:8px;">
+                    <span style="font-size:3rem;line-height:1;">${bigEmoji}</span><br>
+                    <span style="font-size:1.3rem;font-weight:900;color:#065f46;">${bigWord}</span>
+                </div>
+                <div style="font-size:0.78rem;color:#374151;font-weight:bold;">${scenario.keyPoint}</div>`;
+            // 後冊答對浮字特效
+            fxB2FloatText('✅ '+bigWord, '#15803d', app);
+        } else {
+            window.SharedAudio.playSFX('wrong');
+            feedbackCard.classList.add('b2-wrong');
+            title.innerHTML='⚠️ 嗶嗶！有風險';
+            const ca=scenario.options.find(o=>o.isCorrect).text;
+            text.innerHTML=`比較安全的做法：<br><strong>${ca}</strong><br><span class="text-sm">${scenario.explanation}</span>`;
+            detectiveText.innerHTML=`
+                <div style="text-align:center;margin-bottom:8px;">
+                    <span style="font-size:3rem;line-height:1;">${bigEmoji}</span><br>
+                    <span style="font-size:1.3rem;font-weight:900;color:#7f1d1d;">${bigWord}</span>
+                </div>
+                <div style="font-size:0.78rem;color:#374151;font-weight:bold;">🛡️ ${scenario.actionTip}</div>`;
+            // 後冊答錯浮字特效
+            fxB2FloatText('❌ '+bigWord, '#b91c1c', app);
+        }
+        nextBtn.innerText=(this.currentIndex===this.currentQuestions.length-1)?"查看實戰檢討":"下一題";
+        // 修正五：1.5 秒後才顯示「下一題」按鈕，讓孩子有時間讀完說明
+        nextBtn.style.display='none';
+        setTimeout(()=>{ nextBtn.style.display=''; }, 1500);
+        const cb=document.getElementById('b2-chat-history');
+        cb.scrollTop=cb.scrollHeight;
+        setTimeout(()=>{ cb.scrollTop=cb.scrollHeight; },50);
+    },
+
+    nextScenario:function(){ window.SharedAudio.playSFX('click'); this.currentIndex++; if(this.currentIndex<this.currentQuestions.length)this.loadScenario(); else this.showEndView(); },
+
+    // 修正七：重練單一錯題（不計分）
+    retrySingleQuestion:function(idx){
+        const wq=this.wrongQuestions[idx];
+        if(!wq||!wq.scenario)return;
+        window.SharedAudio.playSFX('click');
+        // 標記重練模式
+        this._retryMode=true;
+        this._retryScenario=wq.scenario;
+        // 關閉結算畫面，開啟聊天視窗
+        document.getElementById('b2-end-view').classList.remove('active');
+        document.getElementById('b2-chat-view').classList.add('active');
+        // 顯示重練橫幅
+        let banner=document.getElementById('b2-retry-banner');
+        if(!banner){
+            banner=document.createElement('div');
+            banner.id='b2-retry-banner';
+            banner.style.cssText='background:#dbeafe;border-bottom:3px solid #3b82f6;padding:8px;text-align:center;font-weight:900;color:#1e3a8a;font-size:0.95rem;';
+            const chatBody=document.getElementById('b2-chat-history').parentElement;
+            chatBody.insertBefore(banner, document.getElementById('b2-chat-history'));
+        }
+        banner.innerHTML='🔁 重練模式（不計分）';
+        banner.style.display='block';
+        // 載入這一題（用單題模式）
+        this._loadSingleScenario(wq.scenario);
+    },
+
+    _loadSingleScenario:function(s){
+        document.getElementById('b2-ui-group-name').innerText=`${s.groupIcon} ${s.groupName}`;
+        document.getElementById('b2-ui-progress').innerText='重練中';
+        const chatHistory=document.getElementById('b2-chat-history');
+        chatHistory.innerHTML='';
+        document.getElementById('b2-feedback-area').style.display='none';
+        const optsAreaInit=document.getElementById('b2-options-area');
+        optsAreaInit.innerHTML='<div style="text-align:center;color:#94a3b8;font-weight:bold;font-size:0.95rem;padding:12px;">🤔 訊息傳來了，想想看怎麼回應...</div>';
+        optsAreaInit.style.display='flex';
+        // 打字動畫
+        s.messages.forEach((msg,idx)=>{
+            chatHistory.innerHTML+=`<div class="msg-row msg-left typing-row"><div class="avatar shadow-sm">${msg.sender.charAt(0)}</div><div class="msg-content"><div class="sender-name">${msg.sender}</div><div class="msg-bubble typing-bubble"><span class="typing-dots"><span>•</span><span>•</span><span>•</span></span></div></div></div>`;
+        });
+        chatHistory.scrollTop=chatHistory.scrollHeight;
+        if(this._typingTimer) clearTimeout(this._typingTimer);
+        this._typingTimer=setTimeout(()=>{
+            chatHistory.innerHTML='';
+            s.messages.forEach(msg=>{
+                chatHistory.innerHTML+=`<div class="msg-row msg-left"><div class="avatar shadow-sm">${msg.sender.charAt(0)}</div><div class="msg-content"><div class="sender-name">${msg.sender}</div><div class="msg-bubble">${msg.text}</div></div></div>`;
+            });
+            window.SharedAudio.playSFX('msg');
+            chatHistory.innerHTML+=`<div class="b2-system-prompt">💡 重新練習：你會怎麼做？</div>`;
+            const optsArea=document.getElementById('b2-options-area');
+            optsArea.innerHTML='';
+            optsArea.style.display='flex';
+            // 重練時要重新洗牌選項
+            const shuffled=[...s.options];
+            for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+            shuffled.forEach(opt=>{
+                const btn=document.createElement('button');
+                btn.className='option-btn hover:bg-blue-50';
+                btn.innerText=opt.text;
+                btn.onclick=()=>window.AppGame2._retrySelectOption(opt,s);
+                optsArea.appendChild(btn);
+            });
+            chatHistory.scrollTop=chatHistory.scrollHeight;
+        },1200);
+    },
+
+    _retrySelectOption:function(selectedOpt,scenario){
+        const optsArea=document.getElementById('b2-options-area');
+        optsArea.style.pointerEvents='none';
+        window.SharedAudio.playSFX('click');
+        optsArea.style.display='none';
+        const chatHistory=document.getElementById('b2-chat-history');
+        chatHistory.innerHTML+=`<div class="msg-row msg-right"><div class="msg-content"><div class="sender-name">我</div><div class="msg-bubble">${selectedOpt.text}</div></div><div class="avatar shadow-sm" style="background-color:#bae6fd;">我</div></div>`;
+        chatHistory.scrollTop=chatHistory.scrollHeight;
+        // 顯示回饋
+        setTimeout(()=>{
+            const app=document.getElementById('b2-app-container');
+            const flash=document.createElement('div');
+            flash.className=selectedOpt.isCorrect?'flash-overlay':'flash-overlay';
+            flash.style.background=selectedOpt.isCorrect?'rgba(34,197,94,0.35)':'rgba(239,68,68,0.35)';
+            app.appendChild(flash);
+            setTimeout(()=>flash.remove(),500);
+            window.SharedAudio.playSFX(selectedOpt.isCorrect?'correct':'wrong');
+            const feedbackArea=document.getElementById('b2-feedback-area');
+            const feedbackCard=document.getElementById('b2-feedback-card');
+            const title=document.getElementById('b2-feedback-title');
+            const text=document.getElementById('b2-feedback-text');
+            const detectiveText=document.getElementById('b2-detective-text');
+            const nextBtn=document.getElementById('b2-next-btn');
+            feedbackArea.style.display='flex';
+            feedbackCard.classList.remove('b2-correct','b2-wrong');
+            if(selectedOpt.isCorrect){
+                feedbackCard.classList.add('b2-correct');
+                title.innerHTML='🎉 這次答對了！';
+                text.innerHTML=`太棒了！你進步了！<br><span class="text-sm">${scenario.explanation}</span>`;
+                detectiveText.innerHTML='<div style="text-align:center;"><span style="font-size:3rem;">🏅</span><br><span style="font-size:1.2rem;font-weight:900;color:#065f46;">你記起來了！</span></div>';
+            } else {
+                feedbackCard.classList.add('b2-wrong');
+                title.innerHTML='⚠️ 再試一次！';
+                const ca=scenario.options.find(o=>o.isCorrect).text;
+                text.innerHTML=`比較安全的做法：<br><strong>${ca}</strong><br><span class="text-sm">${scenario.explanation}</span>`;
+                detectiveText.innerHTML='<div style="text-align:center;"><span style="font-size:3rem;">💪</span><br><span style="font-size:1.2rem;font-weight:900;color:#7f1d1d;">沒關係，多練幾次！</span></div>';
+            }
+            // 「下一題」按鈕改成「回到結算」
+            nextBtn.innerText='✅ 回到結算';
+            nextBtn.style.display='none';
+            setTimeout(()=>{ nextBtn.style.display=''; },1500);
+            nextBtn.onclick=()=>window.AppGame2._endRetry();
+        },600);
+    },
+
+    _endRetry:function(){
+        window.SharedAudio.playSFX('click');
+        // 回到結算畫面
+        document.getElementById('b2-feedback-area').style.display='none';
+        document.getElementById('b2-options-area').style.pointerEvents='';
+        const banner=document.getElementById('b2-retry-banner');
+        if(banner)banner.style.display='none';
+        // 把 nextBtn onclick 還原
+        document.getElementById('b2-next-btn').onclick=()=>window.AppGame2.nextScenario();
+        document.getElementById('b2-chat-view').classList.remove('active');
+        document.getElementById('b2-end-view').classList.add('active');
+        this._retryMode=false;
+        // 【Bug1修正】同步清空 _retryScenario，防止殘留記憶體參照
+        this._retryScenario=null;
+    },
+
+    showEndView:function(){
+        window.SharedAudio.playSFX('complete');
+        document.getElementById('b2-chat-view').classList.remove('active');
+        document.getElementById('b2-end-view').classList.add('active');
+        document.getElementById('b2-end-correct').innerText=this.score;
+        document.getElementById('b2-end-wrong').innerText=this.QUESTION_COUNT-this.score;
+        // 修改五：計算並顯示答對率，讓孩子和老師一眼看懂成績
+        const pctEl=document.getElementById('b2-accuracy');
+        if(pctEl){
+            const pct=Math.round((this.score/this.QUESTION_COUNT)*100);
+            let color='text-slate-700';
+            if(pct>=80) color='text-green-600';
+            else if(pct>=60) color='text-blue-600';
+            else color='text-amber-600';
+            pctEl.className='text-2xl font-black mt-2 mb-1 '+color;
+            pctEl.textContent='答對率：'+pct+'%';
+        }
+        // 新功能C：計算並顯示平均思考時間
+        const avgEl=document.getElementById('b2-avg-time');
+        if(avgEl && this.responseTimes.length>0){
+            const avg=Math.round(this.responseTimes.reduce((a,b)=>a+b,0)/this.responseTimes.length);
+            let comment='';
+            if(avg<=5)      comment='⚡ 反應超快！';
+            else if(avg<=10) comment='👍 想得很仔細！';
+            else             comment='🤔 慢慢想也很好！';
+            avgEl.textContent='⏱️ 平均思考時間：'+avg+'秒　'+comment;
+        } else if(avgEl){
+            avgEl.textContent='';
+        }
+        updateRankCard('b2',this.score);
+        const isNew=checkAndSaveBest('b2',this.score);
+        // 【修正D】後冊 showEndView 原本沒有呼叫 updateHubBestScores，
+        //   玩完後冊按「回首頁」才更新，與前冊（gameOver）行為不一致；統一補上
+        updateHubBestScores();
+        const bw=document.getElementById('b2-new-record-badge');
+        if(bw)bw.style.display=isNew?'block':'none';
+
+        // 修正三：依分數顯示成績橫幅
+        const banner=document.getElementById('b2-result-banner');
+        if(banner){
+            banner.className='b2-result-banner';
+            banner.style.display='block';
+            if(this.score===10){
+                banner.classList.add('gold');
+                banner.innerHTML='🏆 全部答對！偵探高手！';
+                launchFireworks();
+                const pbw=document.getElementById('b2-perfect-badge-wrap');
+                if(pbw)pbw.style.display='block';
+            } else if(this.score>=7){
+                banner.classList.add('green');
+                banner.innerHTML=`🎉 答對 ${this.score} 題！你很厲害！`;
+                launchMiniFireworks();
+                const pbw=document.getElementById('b2-perfect-badge-wrap');
+                if(pbw)pbw.style.display='none';
+            } else if(this.score>=4){
+                banner.classList.add('blue');
+                banner.innerHTML='💪 繼續加油！下次會更好！';
+                const pbw=document.getElementById('b2-perfect-badge-wrap');
+                if(pbw)pbw.style.display='none';
+            } else {
+                banner.classList.add('amber');
+                banner.innerHTML='📚 沒關係，多練幾次就會了！';
+                const pbw=document.getElementById('b2-perfect-badge-wrap');
+                if(pbw)pbw.style.display='none';
+            }
+        }
+        const reviewSection=document.getElementById('b2-review-section'),reviewList=document.getElementById('b2-review-list');
+        reviewList.innerHTML='';
+        if(this.wrongQuestions.length>0){
+            reviewSection.style.display='block';
+            this.wrongQuestions.forEach((item,idx)=>{
+                let shortQ=item.question.length>35?item.question.substring(0,35)+'...':item.question;
+                // 【修正3】重練按鈕原用 Tailwind 不存在的 border-3，邊框在電腦版完全失效
+                //   → 改成 border-4 並加上 inline style 雙重保險，確保黑色粗邊框正常顯示
+                reviewList.innerHTML+=`<div class="b2-review-card"><div class="font-bold text-slate-800 mb-2 leading-snug">Q: ${shortQ}</div><div class="text-sm text-slate-500 line-through mb-1">❌ 你的選擇：${item.myAnswer}</div><div class="text-sm text-green-700 font-bold mb-2">✅ 比較安全：${item.correctAnswer}</div><div class="text-sm text-blue-700 font-bold mb-2">✅ 正確做法：${item.actionTip||item.keyPoint}</div><div class="text-sm text-slate-600 border-t-2 border-slate-200 pt-2 mb-3"><strong>重點：</strong>${item.keyPoint}</div><button onclick="window.AppGame2.retrySingleQuestion(${idx})" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black text-sm py-2 rounded-full border-4 border-slate-800 shadow-[3px_3px_0_#1e293b] active:translate-y-1 active:shadow-none transition-all" style="border:4px solid #1e293b;">🔁 重練這題</button></div>`;
+            });
+        } else {
+            reviewSection.style.display='block';
+            reviewList.innerHTML='<div class="bg-white p-4 rounded-xl border-4 border-slate-800 font-bold text-green-600 text-center shadow-[4px_4px_0_#1e293b]">太強了！你做出了 100% 的安全回應！🎉 你是最強小偵探！</div>';
+        }
+    },
+    resetToStart:function(){ document.getElementById('b2-end-view').classList.remove('active'); document.getElementById('b2-chat-view').classList.remove('active'); },
+    // 功能三：後冊語音朗讀
+    speakScenario:function(){
+        if(this.isPaused)return;
+        if(!('speechSynthesis' in window)){alert('您的瀏覽器不支援朗讀功能');return;}
+        // 修正一：重練模式下讀 _retryScenario，一般模式讀 currentQuestions[currentIndex]
+        const s = this._retryMode
+            ? this._retryScenario
+            : (this.currentQuestions && this.currentQuestions[this.currentIndex]);
+        if(!s)return;
+        try{
+            window.speechSynthesis.cancel();
+            const btn=document.getElementById('b2-speak-btn');
+            if(btn){btn.style.opacity='0.5'; btn.style.pointerEvents='none';}
+            // 組合朗讀文字：發送者 + 訊息 + 選項
+            let allText=`${s.groupName}。`;
+            s.messages.forEach(m=>{ allText+=`${m.sender}說：${m.text}。`; });
+            allText+='你的選擇是：';
+            s.options.forEach((o,i)=>{ allText+=`選項${i+1}，${o.text}。`; });
+            const utter=new SpeechSynthesisUtterance(allText);
+            utter.lang='zh-TW'; utter.rate=0.85; utter.pitch=1.1;
+            utter.onend=()=>{ if(btn){btn.style.opacity='1'; btn.style.pointerEvents='auto';} };
+            utter.onerror=()=>{ if(btn){btn.style.opacity='1'; btn.style.pointerEvents='auto';} };
+            window.speechSynthesis.speak(utter);
+        }catch(e){console.error(e);}
+    },
+    isPaused:false,
+    togglePause:function(){
+        const btn=document.getElementById('b2-pause-btn');
+        const app=document.getElementById('b2-app-container');
+        let overlay=document.getElementById('b2-pause-overlay');
+        if(this.isPaused){
+            // 取消暫停
+            this.isPaused=false;
+            if(btn)btn.innerHTML='⏸ 暫停';
+            if(overlay)overlay.remove();
+            // 恢復遊戲BGM
+            if(window.SharedAudio && !window.SharedAudio.isMuted && window.SharedAudio.volume>0){
+                window.SharedAudio.startGameBGM();
+                window.SharedAudio.setGameTension(0.3);
+            }
+        } else {
+            // 開啟暫停
+            this.isPaused=true;
+            if(btn)btn.innerHTML='▶ 繼續';
+            // 停止BGM
+            if(window.SharedAudio)window.SharedAudio.stopGameBGM();
+            // 清除 typing 計時器，避免暫停時還繼續更新畫面
+            if(this._typingTimer){ clearTimeout(this._typingTimer); this._typingTimer=null; }
+            // 加入暫停遮罩
+            overlay=document.createElement('div');
+            overlay.id='b2-pause-overlay';
+            overlay.className='b2-pause-mask';
+            overlay.onclick=()=>window.AppGame2.togglePause();
+            overlay.innerHTML='<div class="b2-pause-label">⏸ 暫停中<div class="text-base font-bold mt-2">點擊任何地方繼續</div></div>';
+            app.appendChild(overlay);
+        }
+        if(window.SharedAudio)window.SharedAudio.playSFX('click');
+    },
+    stopGame:function(){
+        // 【bugfix】原本是空函式；玩家在打字動畫播放中按「回首頁」時，
+        // _typingTimer 仍繼續倒數，1.2 秒後觸發 DOM 操作（往已隱藏的聊天畫面寫入），
+        // 在低階裝置上可能造成畫面閃爍或控制台錯誤。
+        // 修正：清除計時器並重置 isPaused，確保返回首頁後狀態乾淨。
+        if(this._typingTimer){ clearTimeout(this._typingTimer); this._typingTimer=null; }
+        this.isPaused=false;
+    }
+};
+
+
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded',()=>{
+    updateHubBestScores();
+   
+    window.addEventListener('click',()=>{ if(window.SharedAudio&&!window.SharedAudio.ctx)window.SharedAudio.init(); },{once:true});
+});
+</script>
+</body>
+</html>
