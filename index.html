@@ -1356,67 +1356,67 @@ function updateRankCard(idPrefix,correctCount){ const rankData=getDetectiveRank(
 window.AppGame1 = {
     b1Questions: [
         // 🛑 危險訊息 (10題)
-        {type:'danger',icon:'🎮',text:'🎮 點這裡免費拿 10000 點遊戲點數！',explanation:'真的遊戲不會用奇怪連結送點數，這是壞人騙你的！',tip:'看到免費禮物的連結，先不要點，告訴爸爸媽媽！'},
-        {type:'danger',icon:'🔑',text:'🔑 輸入你的遊戲密碼來領造型！',explanation:'告訴別人密碼，你的遊戲帳號就會被偷走！',tip:'密碼是你的秘密，絕對不能告訴任何人！'},
-        {type:'danger',icon:'💬',text:'💬 同學說：把手機收到的數字傳給我！',explanation:'手機收到的驗證號碼，給別人就會被盜走帳號！',tip:'手機收到的數字像鑰匙，誰都不能給！'},
-        {type:'danger',icon:'🎁',text:'🎁 中獎啦！先付 100 元運費才能拿 iPhone！',explanation:'要你先付錢才能拿獎品，一定是騙人的！',tip:'要先付錢的獎品都是假的，馬上告訴大人！'},
-        {type:'danger',icon:'⚠️',text:'⚠️ 你的遊戲帳號要被停了！點這裡！',explanation:'壞人想騙你點奇怪連結，騙走你的密碼！',tip:'有問題自己打開遊戲看，不要點奇怪連結！'},
-        {type:'danger',icon:'👩‍🏫',text:'📲 老師說：去超商買 5000 元點數給我，很急！',explanation:'真的老師不會用訊息叫你買點數，這是假老師！',tip:'覺得怪怪的，馬上當面問老師是不是真的！'},
-        {type:'danger',icon:'🎀',text:'🎀 加這個群組，免費送你 500 元禮券！',explanation:'加奇怪的群組，你的資料會被壞人看光光！',tip:'不要隨便加陌生人群組，問爸爸媽媽再決定！'},
-        {type:'danger',icon:'👮',text:'📞 假警察說：你犯法了，快把錢給我保管！',explanation:'真的警察不會打電話叫你給錢，這是壞人裝的！',tip:'聽到要你給錢，馬上掛掉電話告訴爸媽！'},
-        {type:'danger',icon:'📦',text:'📦 簡訊：你的包裹要點連結付錢才能拿！',explanation:'真的宅配不會用簡訊叫你付錢，這是釣魚簡訊！',tip:'看到簡訊裡有連結要錢，直接刪掉不要點！'},
-        {type:'danger',icon:'👻',text:'👻 不傳給 10 個朋友，明天就會倒大楣！',explanation:'這是惡作劇，用嚇你的方法逼你轉傳！',tip:'這種嚇人的訊息直接刪掉，什麼壞事都不會發生！'},
+        {type:'danger',icon:'🎮',text:'🎮 點這裡免費拿 10000 點遊戲點數！',explanation:'真的遊戲不會用連結送你點數！',tip:'看到免費禮物的連結，告訴爸媽再說！'},
+        {type:'danger',icon:'🔑',text:'🔑 輸入你的遊戲密碼來領造型！',explanation:'告訴別人密碼，帳號馬上就被偷走！',tip:'密碼是秘密，誰都不能說！'},
+        {type:'danger',icon:'💬',text:'💬 同學說：把手機收到的數字傳給我！',explanation:'驗證碼是帳號的鑰匙，給別人就被盜！',tip:'手機收到的數字，誰都不能給！'},
+        {type:'danger',icon:'🎁',text:'🎁 中獎啦！先付 100 元運費才能拿 iPhone！',explanation:'要你先付錢才給獎品，一定是騙人的！',tip:'叫你先付錢的獎品，直接告訴爸媽！'},
+        {type:'danger',icon:'⚠️',text:'⚠️ 你的遊戲帳號要被停了！點這裡！',explanation:'壞人用假警告，騙你點連結偷密碼！',tip:'有問題自己打開遊戲查，不要點連結！'},
+        {type:'danger',icon:'👩‍🏫',text:'📲 老師說：去超商買 5000 元點數給我，很急！',explanation:'真的老師不會叫你買點數，是壞人假扮的！',tip:'當面去問老師是不是真的！'},
+        {type:'danger',icon:'🎀',text:'🎀 加這個群組，免費送你 500 元禮券！',explanation:'加陌生群組，你的資料會被壞人看光！',tip:'不認識的群組，問爸媽再加！'},
+        {type:'danger',icon:'👮',text:'📞 假警察說：你犯法了，快把錢給我保管！',explanation:'真的警察不會打電話叫你付錢！',tip:'聽到叫你付錢，馬上掛掉告訴爸媽！'},
+        {type:'danger',icon:'📦',text:'📦 簡訊：你的包裹要點連結付錢才能拿！',explanation:'真的宅配不會用簡訊叫你付錢！',tip:'看到簡訊有連結要錢，直接刪掉！'},
+        {type:'danger',icon:'👻',text:'👻 不傳給 10 個朋友，明天就會倒大楣！',explanation:'嚇你要轉傳的訊息都是假的！',tip:'這種嚇人訊息直接刪掉，什麼都不會發生！'},
 
         // 🔍 可疑訊息 (10題)
-        {type:'suspicious',icon:'📷',text:'📷 截圖說明天颱風假！（沒有學校官網證明）',explanation:'截圖很容易被改造，沒有學校官網說的不能信！',tip:'颱風假是大事，要看學校官網或新聞才算數！'},
-        {type:'suspicious',icon:'💬',text:'💬 不認識的人說：學校老師偷錢！',explanation:'不知道是誰說的話，亂傳會傷害到老師！',tip:'沒有證據的傳言不要相信，更不要傳給別人！'},
-        {type:'suspicious',icon:'📺',text:'📺 影片標題：吃糖果可以長高 30 公分！',explanation:'糖果不可能讓你長 30 公分，這是騙點擊的假影片！',tip:'太誇張的事情都是假的，要去問醫生或老師！'},
+        {type:'suspicious',icon:'📷',text:'📷 截圖說明天颱風假！（沒有學校官網證明）',explanation:'截圖容易被人改造，不能當真！',tip:'颱風假要看學校官網才算數！'},
+        {type:'suspicious',icon:'💬',text:'💬 不認識的人說：學校老師偷錢！',explanation:'不知道是誰說的，傳出去會傷害老師！',tip:'沒有證據的傳言，不要傳給別人！'},
+        {type:'suspicious',icon:'📺',text:'📺 影片標題：吃糖果可以長高 30 公分！',explanation:'太誇張了，這是為了騙你點擊的假影片！',tip:'太誇張的事情，要去問老師或醫生！'},
         // 【修正5】補 imageAlt 欄位（淹水題）→ 讀屏軟體可以朗讀「一張街道淹水的照片」
-        {type:'suspicious',icon:'🌊',imageUrl:'https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&q=80',imageAlt:'一張街道淹水的照片',text:'📷 有人傳這張淹水照片說「今天台北大淹水！」，但照片沒有日期也沒有地點。',explanation:'這張可能是很久以前或別的國家的舊照片，被拿來騙人說是今天發生的！',tip:'看到驚人照片，先問是哪裡、什麼時候拍的才能判斷真假！'},
-        {type:'suspicious',icon:'🧄',text:'🧄 阿嬤傳：每天吃大蒜，永遠不會生病！',explanation:'沒有任何食物可以讓人完全不生病，這是假的！',tip:'健康問題要問醫生，不要相信網路上的偏方！'},
+        {type:'suspicious',icon:'🌊',imageUrl:'https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&q=80',imageAlt:'一張街道淹水的照片',text:'📷 有人傳這張淹水照片說「今天台北大淹水！」，但照片沒有日期也沒有地點。',explanation:'沒有日期和地點的照片，可能是很久以前的舊照片！',tip:'看到驚人照片，先問是哪裡、什麼時候拍的！'},
+        {type:'suspicious',icon:'🧄',text:'🧄 阿嬤傳：每天吃大蒜，永遠不會生病！',explanation:'沒有任何食物可以讓人永遠不生病！',tip:'健康問題要問醫生，不要信網路偏方！'},
         // 【修正5】補 imageAlt 欄位（恐龍題）→「博物館裡的恐龍骨架」
-        {type:'suspicious',icon:'🦴',imageUrl:'https://images.unsplash.com/photo-1519659528534-7fd733a832a0?w=600&q=80',imageAlt:'博物館裡的恐龍骨架',text:'🦴 有人說：附近公園昨天有真的恐龍出沒，大家不要去！',explanation:'恐龍早在六千六百萬年前就滅絕了，這完全是假的傳言！',tip:'照片裡是博物館的恐龍化石，不是真的活恐龍，太誇張的事一定是假的！'},
+        {type:'suspicious',icon:'🦴',imageUrl:'https://images.unsplash.com/photo-1519659528534-7fd733a832a0?w=600&q=80',imageAlt:'博物館裡的恐龍骨架',text:'🦴 有人說：附近公園昨天有真的恐龍出沒，大家不要去！',explanation:'恐龍已經滅絕了，這完全是假的！',tip:'太誇張的事情一定是假的！'},
         // 【修正A】耳機題 imageAlt 原為「一個人戴著耳機的照片」，
         //   但 photo-1505740420928 實為白色無線耳機靜物照（無人物）；修正描述更精確
-        {type:'suspicious',icon:'🎧',imageUrl:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',imageAlt:'一副白色無線耳機的照片',text:'🎧 有人傳：每天睡覺時戴耳機聽音樂，大腦會變得超聰明、成績變很好！',explanation:'睡覺時戴耳機不但不會讓大腦變聰明，還會影響睡眠和傷害耳朵！',tip:'太誇張的健康說法要問爸媽或醫生，不要輕易相信！'},
-        {type:'suspicious',icon:'💔',text:'💔 截圖說：你最喜歡的卡通下週就停播了！',explanation:'這種截圖很容易用修圖軟體做出來，可能是假的！',tip:'看到震驚的消息，去卡通的官方頻道看才準！'},
+        {type:'suspicious',icon:'🎧',imageUrl:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',imageAlt:'一副白色無線耳機的照片',text:'🎧 有人傳：每天睡覺時戴耳機聽音樂，大腦會變得超聰明、成績變很好！',explanation:'戴耳機睡覺只會傷耳朵，不會變聰明！',tip:'太誇張的健康說法，去問爸媽或醫生！'},
+        {type:'suspicious',icon:'💔',text:'💔 截圖說：你最喜歡的卡通下週就停播了！',explanation:'這種截圖很容易被人改造，可能是假的！',tip:'看到震驚的消息，去卡通官方頻道看才準！'},
         // 【修正A】原圖片 photo-1611689342806 是鸚鵡（非老鷹），與題目嚴重不符；
         //   換用 photo-1551085254-e96b210db58a（Unsplash 真實老鷹頭部特寫）
-        {type:'suspicious',icon:'🦅',imageUrl:'https://images.unsplash.com/photo-1551085254-e96b210db58a?w=600&q=80',imageAlt:'一隻老鷹的頭部特寫照片',text:'🦅 有人說這張老鷹照片裡的老鷹有魔法，背上會長出翅膀！',explanation:'照片是正常老鷹，但文字是假的！真實照片也可以配上假文字騙人！',tip:'看到照片要想想：圖和文字說的有沒有對？文字也可能是假的！'},
-        {type:'suspicious',icon:'🏫',text:'🏫 聽說：下個月開始每天要上課到晚上九點！',explanation:'這只是聽說，沒有學校正式通知，不能相信！',tip:'學校的規定會發正式通知單，「聽說」的不算！'},
+        {type:'suspicious',icon:'🦅',imageUrl:'https://images.unsplash.com/photo-1551085254-e96b210db58a?w=600&q=80',imageAlt:'一隻老鷹的頭部特寫照片',text:'🦅 有人說這張老鷹照片裡的老鷹有魔法，背上會長出翅膀！',explanation:'真實照片也可以配上假文字來騙人！',tip:'看到照片，想想圖和文字說的有沒有對！'},
+        {type:'suspicious',icon:'🏫',text:'🏫 聽說：下個月開始每天要上課到晚上九點！',explanation:'只是聽說，沒有學校正式通知不能信！',tip:'學校有新規定，老師一定會發通知單！'},
 
         // ✅ 可信訊息 (10題)
-        {type:'credible',icon:'🏫',text:'🏫 學校官網公告：下週三是校外教學日！',explanation:'學校自己的網站是最正確的消息來源！',tip:'學校的事情，看學校官網最準！'},
-        {type:'credible',icon:'📒',text:'📒 老師在聯絡簿寫：明天要帶水壺！',explanation:'老師親手寫的聯絡簿，是最可靠的通知！',tip:'聯絡簿上的字是老師寫的，可以放心相信！'},
-        {type:'credible',icon:'🌀',text:'🌀 氣象局 APP 通知：明天有颱風要來！',explanation:'氣象局是國家專門看天氣的，最準確！',tip:'天氣的事情，看氣象局的 APP 最準！'},
-        {type:'credible',icon:'👮',text:'👮 警察叔叔到學校宣導：不要給陌生人密碼！',explanation:'警察叔叔來學校教的事情是真的，要記得！',tip:'警察叔叔教的安全規則，要乖乖記起來！'},
-        {type:'credible',icon:'🧼',text:'🧼 衛生所阿姨：飯前飯後要用肥皂洗手！',explanation:'衛生所是教大家健康的地方，說的話可以相信！',tip:'醫生和護理師教的健康知識，要照做！'},
-        {type:'credible',icon:'🎒',text:'🎒 學校發的紙本通知：下學期 2/15 開學！',explanation:'學校蓋章發給家長的紙本通知最可靠！',tip:'有學校蓋章的紙本通知，是真的消息！'},
-        {type:'credible',icon:'📺',text:'📺 大電視台新聞：警方抓到詐騙集團！',explanation:'大電視台的新聞有記者確認過，比較可信！',tip:'看新聞要選有信譽的電視台，不要看奇怪的影片！'},
-        {type:'credible',icon:'🏥',text:'🏥 學校護理師通知：流感流行請戴口罩！',explanation:'學校護理師發的健康通知，要乖乖聽！',tip:'學校健康通知，要好好遵守保護自己！'},
-        {type:'credible',icon:'👨‍👩‍👧',text:'👨‍👩‍👧 媽媽親口說：不要把名字告訴陌生人！',explanation:'爸爸媽媽教你的安全規則，最真實也最重要！',tip:'爸媽教的安全規則一定要記住喔！'},
-        {type:'credible',icon:'🎮',text:'🎮 遊戲開機畫面公告：請小心假冒客服！',explanation:'遊戲自己的公告才是真的，會教你怎麼保護帳號！',tip:'遊戲裡的事情，看遊戲的官方公告最準！'},
+        {type:'credible',icon:'🏫',text:'🏫 學校官網公告：下週三是校外教學日！',explanation:'學校自己的網站是最正確的消息來源！',tip:'學校的事情，看官網最準！'},
+        {type:'credible',icon:'📒',text:'📒 老師在聯絡簿寫：明天要帶水壺！',explanation:'老師親手寫的聯絡簿，是最可靠的通知！',tip:'聯絡簿上的字，可以放心相信！'},
+        {type:'credible',icon:'🌀',text:'🌀 氣象局 APP 通知：明天有颱風要來！',explanation:'氣象局是國家專門看天氣的，最準確！',tip:'天氣的事，看氣象局 APP 最準！'},
+        {type:'credible',icon:'👮',text:'👮 警察叔叔到學校宣導：不要給陌生人密碼！',explanation:'警察叔叔來學校教的規則，是真的！',tip:'警察叔叔教的安全規則，要記住！'},
+        {type:'credible',icon:'🧼',text:'🧼 衛生所阿姨：飯前飯後要用肥皂洗手！',explanation:'衛生所是教大家健康的地方，說的話可信！',tip:'醫生和護理師教的健康知識，要照做！'},
+        {type:'credible',icon:'🎒',text:'🎒 學校發的紙本通知：下學期 2/15 開學！',explanation:'有學校蓋章的紙本通知，是最可靠的！',tip:'學校蓋章的通知單，是真的消息！'},
+        {type:'credible',icon:'📺',text:'📺 大電視台新聞：警方抓到詐騙集團！',explanation:'大電視台的新聞有記者確認過，比較可信！',tip:'看新聞要選有名的電視台！'},
+        {type:'credible',icon:'🏥',text:'🏥 學校護理師通知：流感流行請戴口罩！',explanation:'學校護理師發的健康通知，是真的！',tip:'學校的健康通知，要乖乖照做！'},
+        {type:'credible',icon:'👨‍👩‍👧',text:'👨‍👩‍👧 媽媽親口說：不要把名字告訴陌生人！',explanation:'爸爸媽媽教你的安全規則，最真實也最重要！',tip:'爸媽說的安全規則一定要記住！'},
+        {type:'credible',icon:'🎮',text:'🎮 遊戲開機畫面公告：請小心假冒客服！',explanation:'遊戲自己的公告才是真的！',tip:'遊戲裡的事，看遊戲官方公告最準！'},
 
         // 🛑 危險訊息補充 (5題)
-        {type:'danger',icon:'🎠',text:'🎠 加這個帳號好友，馬上送你一整套絨毛玩具！',explanation:'用免費禮物引誘你加陌生人，是壞人常用的方法！',tip:'不認識的人送你大禮物，一定要先告訴爸爸媽媽！'},
-        {type:'danger',icon:'🖥️',text:'🖥️ 你的平板中毒了！點這裡立刻免費修復！',explanation:'這是假病毒警告，點了才真的會有問題！',tip:'看到這種可怕警告，關掉畫面告訴爸媽！'},
-        {type:'danger',icon:'🎯',text:'🎯 只有你被選中了！輸入學校名稱和班級就能領獎！',explanation:'騙你填學校資料的人可能是壞人在收集資訊！',tip:'不管多誘人的獎品，填個人資料前要問爸媽！'},
-        {type:'danger',icon:'📸',text:'📸 傳一張你的照片給我，就送你遊戲點數！',explanation:'把照片傳給陌生人很危險，壞人可能拿去做壞事！',tip:'照片比密碼更重要，絕對不能傳給陌生人！'},
-        {type:'danger',icon:'🛒',text:'🛒 限時 60 秒！點這裡買一送十，過了就沒了！',explanation:'故意製造緊迫感讓你來不及思考，是詐騙常用手法！',tip:'越是「快點快點」催你，越要先停下來想一想！'},
+        {type:'danger',icon:'🎠',text:'🎠 加這個帳號好友，馬上送你一整套絨毛玩具！',explanation:'用大禮物引誘你加好友，是壞人常用的方法！',tip:'陌生人送大禮物，馬上告訴爸媽！'},
+        {type:'danger',icon:'🖥️',text:'🖥️ 你的平板中毒了！點這裡立刻免費修復！',explanation:'假病毒警告，點了才真的出問題！',tip:'看到這種警告，關掉後告訴爸媽！'},
+        {type:'danger',icon:'🎯',text:'🎯 只有你被選中了！輸入學校名稱和班級就能領獎！',explanation:'騙你填學校資料，可能是壞人在收集資訊！',tip:'填個人資料前，一定要先問爸媽！'},
+        {type:'danger',icon:'📸',text:'📸 傳一張你的照片給我，就送你遊戲點數！',explanation:'把照片傳給陌生人，壞人可能拿去做壞事！',tip:'照片絕對不能傳給陌生人！'},
+        {type:'danger',icon:'🛒',text:'🛒 限時 60 秒！點這裡買一送十，過了就沒了！',explanation:'故意催你快點，是讓你沒時間想清楚的騙術！',tip:'越催越急，越要先停下來問爸媽！'},
 
         // 🔍 可疑訊息補充 (5題)
-        {type:'suspicious',icon:'🍫',text:'🍫 有人傳：每天吃糖果，牙齒反而會變得超白超健康！',explanation:'糖果吃多了只會蛀牙，完全沒有讓牙齒變白的效果！',tip:'跟常識相反的說法要特別懷疑，去問牙醫才準！'},
-        {type:'suspicious',icon:'🌧️',text:'🌧️ 同學傳訊息說：因為昨天太多人許願，所以今天不會下雨！',explanation:'天氣是自然現象，和許不許願完全沒有關係！',tip:'看到奇怪的科學說法，要去問爸媽或老師！'},
-        {type:'suspicious',icon:'🌙',text:'🌙 傳言：今晚摸一下月亮形狀的石頭，明天考試就會考 100 分！',explanation:'這是沒有根據的迷信說法，考試成績靠的是認真念書！',tip:'這種神奇說法不要信，好好複習才是真的！'},
-        {type:'suspicious',icon:'🎒',text:'🎒 同學說：學校明天要發免費文具給每個人，快去排隊！',explanation:'這只是同學的傳言，沒有學校正式通知不能相信！',tip:'免費發東西這麼大的事，老師一定會先通知！'},
-        {type:'suspicious',icon:'🚌',text:'🚌 同學說：聽說今天校車司機請假，所以不來接我們了！',explanation:'校車若有異動，學校一定會正式通知家長，不會只靠同學傳話！',tip:'學校交通有問題，直接打電話問學校或爸媽！'},
+        {type:'suspicious',icon:'🍫',text:'🍫 有人傳：每天吃糖果，牙齒反而會變得超白超健康！',explanation:'糖果吃多了只會蛀牙，這是假的！',tip:'跟常識相反的說法，去問牙醫才準！'},
+        {type:'suspicious',icon:'🌧️',text:'🌧️ 同學傳訊息說：因為昨天太多人許願，所以今天不會下雨！',explanation:'天氣是自然現象，和許願完全沒關係！',tip:'奇怪的科學說法，去問爸媽或老師！'},
+        {type:'suspicious',icon:'🌙',text:'🌙 傳言：今晚摸一下月亮形狀的石頭，明天考試就會考 100 分！',explanation:'考試成績靠的是認真念書，不是石頭！',tip:'這種神奇說法不要信，好好複習才是真的！'},
+        {type:'suspicious',icon:'🎒',text:'🎒 同學說：學校明天要發免費文具給每個人，快去排隊！',explanation:'只是同學的傳言，沒有老師通知不能信！',tip:'發東西這麼大的事，老師一定會先說！'},
+        {type:'suspicious',icon:'🚌',text:'🚌 同學說：聽說今天校車司機請假，所以不來接我們了！',explanation:'校車有異動，學校一定會正式通知家長！',tip:'校車有問題，直接打電話問學校或爸媽！'},
 
         // ✅ 可信訊息補充 (5題)
-        {type:'credible',icon:'🦷',text:'🦷 牙醫叔叔說：每天刷牙兩次才不會蛀牙！',explanation:'牙醫是專門照顧牙齒健康的醫生，說的話可以信！',tip:'牙醫教的健康習慣要乖乖做到！'},
-        {type:'credible',icon:'🚸',text:'🚸 學校門口的交通導護阿姨說：要走行人專用道！',explanation:'交通導護阿姨是幫忙維護安全的大人，要聽她說的！',tip:'交通規則要聽有執行任務的大人說的！'},
-        {type:'credible',icon:'💊',text:'💊 家庭醫生阿姨說：感冒藥要照時間吃，不能自己多吃！',explanation:'醫生開的藥有專業建議，一定要照指示吃！',tip:'藥的事情一定要聽醫生說的，不能自己決定！'},
-        {type:'credible',icon:'🏊',text:'🏊 游泳教練說：下水前要先做暖身操，才不會抽筋！',explanation:'教練是專業的，教的安全守則非常重要！',tip:'專業教練說的安全守則要好好遵守！'},
-        {type:'credible',icon:'📡',text:'📡 學校廣播系統通知：今天第三節課改成全校集會！',explanation:'學校廣播是正式的通知方式，是真的消息！',tip:'學校廣播說的事情可以放心相信！'},
+        {type:'credible',icon:'🦷',text:'🦷 牙醫叔叔說：每天刷牙兩次才不會蛀牙！',explanation:'牙醫是專門照顧牙齒的醫生，說的話可信！',tip:'牙醫教的健康習慣，要乖乖做到！'},
+        {type:'credible',icon:'🚸',text:'🚸 學校門口的交通導護阿姨說：要走行人專用道！',explanation:'交通導護阿姨是幫忙維護安全的大人！',tip:'交通規則，聽有執行任務的大人說的！'},
+        {type:'credible',icon:'💊',text:'💊 家庭醫生阿姨說：感冒藥要照時間吃，不能自己多吃！',explanation:'醫生開的藥有專業建議，一定要照指示吃！',tip:'藥的事情，一定要聽醫生說的！'},
+        {type:'credible',icon:'🏊',text:'🏊 游泳教練說：下水前要先做暖身操，才不會抽筋！',explanation:'教練教的安全規則，是保護你的！',tip:'游泳前的暖身，教練說了要照做！'},
+        {type:'credible',icon:'📡',text:'📡 學校廣播系統通知：今天第三節課改成全校集會！',explanation:'學校廣播是正式通知，是真的消息！',tip:'學校廣播說的事，可以放心相信！'},
 
         // ===== 【新增】前冊圖片題補充 (3道，共7道) =====
         // 新增原因：圖片題是最有教學效果的題型，從 4 道補到 7 道，
@@ -1429,8 +1429,8 @@ window.AppGame1 = {
          imageUrl:'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?w=600&q=80',
          imageAlt:'一隻手拿著手機顯示訊息的照片',
          text:'📱 有人傳來這張截圖說：「恭喜你中了大獎，點這裡領取！」',
-         explanation:'這種「恭喜中獎」的訊息幾乎都是詐騙，點了連結會有危險！',
-         tip:'突然說你中獎的訊息，先告訴爸媽，絕對不要點連結！'},
+         explanation:'突然說中獎要點連結，幾乎都是詐騙！',
+         tip:'中獎訊息先不要點，告訴爸媽！'},
 
         // 【新增圖片題2 — suspicious】街上人群戴口罩（可疑健康謠言）
         // photo-1584464491033-06628f3a6b7b：人群戴口罩的照片
@@ -1438,8 +1438,8 @@ window.AppGame1 = {
          imageUrl:'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&q=80',
          imageAlt:'街道上許多人戴著口罩的照片',
          text:'😷 有人傳這張照片說「這個地方發生超嚴重疫情，大家快逃！」，但沒有說是哪裡也沒有新聞。',
-         explanation:'照片裡戴口罩可能只是平常防護，沒有說明地點和時間就說「超嚴重疫情」是誇大的假消息！',
-         tip:'看到可怕的健康消息，先去衛生福利部官網查，不要馬上相信或轉傳！'},
+         explanation:'沒說是哪裡也沒有新聞，可能是假消息！',
+         tip:'看到可怕消息，先去衛生福利部官網查！'},
 
         // 【新增圖片題3 — credible】醫生白袍（官方健康通知）
         // photo-1576091160550-2173dba999ef：穿白袍的醫生照片
@@ -1447,8 +1447,8 @@ window.AppGame1 = {
          imageUrl:'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&q=80',
          imageAlt:'一位穿白袍的醫生正在診療的照片',
          text:'👨‍⚕️ 學校護理師傳來這張照片和通知：「最近流感盛行，請大家記得洗手、戴口罩！」',
-         explanation:'學校護理師是專業的健康人員，她發的健康通知是真的，要乖乖照做！',
-         tip:'學校護理師和醫生的健康提醒要認真聽，照著做才能保護自己！'},
+         explanation:'學校護理師是專業的，她的健康通知是真的！',
+         tip:'護理師的健康提醒，照著做就對了！'},
     ],
 
     b1CurrentDeck:[],b1CurrentIndex:0,b1Correct:0,b1Wrong:0,currentQuestion:null,
@@ -1617,23 +1617,12 @@ window.AppGame1 = {
             imgEl.alt='題目圖片';   // 重置，避免上一題的 alt 殘留
             iconEl.style.display='';
         }
-        // 優化二：每3題打亂按鈕順序
-        if(this.b1CurrentIndex%3===0){
-            const btnWrap=document.querySelector('.b1-btn-row');
-            if(btnWrap){
-                const btns=Array.from(btnWrap.children);
-                // 淡出
-                btnWrap.style.opacity='0';
-                btnWrap.style.transition='opacity 0.2s';
-                // shuffle
-                for(let i=btns.length-1;i>0;i--){
-                    const j=Math.floor(Math.random()*(i+1));
-                    btnWrap.appendChild(btns[j]);
-                    btns.splice(j,1);
-                }
-                // 淡入
-                setTimeout(()=>{ btnWrap.style.opacity='1'; },200);
-            }
+        // 【修改】移除打亂按鈕順序功能，改為固定位置（左紅、中黃、右綠）
+        // 讓小朋友建立穩定的空間記憶，每次都能直接找到按鈕
+        const btnWrapFixed=document.querySelector('.b1-btn-row');
+        if(btnWrapFixed){
+            btnWrapFixed.style.opacity='0';
+            setTimeout(()=>{ btnWrapFixed.style.opacity='1'; },100);
         }
         this.timeLeft=this.maxSeconds; this.updateTimerUI(); clearInterval(this.timerId);
         this.timerId=setInterval(()=>{
@@ -2112,14 +2101,14 @@ window.AppGame2 = {
         // 社群/影片 (3題) + 【新增3題→共6題】
         //   新增原因：social 原只有3題，每局10題抽選時嚴重偏少；
         //   補充3道覆蓋「網路謠言截圖」「LINE 假好康」「個資外洩留言」新場景
-        {difficulty:2,category:'social',groupIcon:'📱',groupName:'同學聊天室',messages:[{sender:'同學',text:'看這個 5 秒短影片，那個男生推人！大家去他影片下面罵他！'}],options:[{text:'太過分了，我去留言罵',isCorrect:false},{text:'告訴同學先看清楚再決定',isCorrect:true},{text:'跟著大家一起留言',isCorrect:false}],explanation:'5 秒太短了，可能前後發生什麼事都不知道，跟著罵會變網路霸凌！',keyPoint:'短影片容易誤會，別急著罵！',actionTip:'先弄清楚整件事再說！'},
-        {difficulty:1,category:'social',groupIcon:'💬',groupName:'朋友群組',messages:[{sender:'同學',text:'這是魔法信！不在 10 分鐘內傳給 10 個人，你就會倒大楣！'}],options:[{text:'好可怕，趕快傳出去',isCorrect:false},{text:'這是嚇唬人的，直接刪除',isCorrect:true},{text:'怕怕的，傳給 5 個就好',isCorrect:false}],explanation:'這種「不傳會倒楣」的訊息全部都是嚇唬人，不會發生壞事！',keyPoint:'嚇唬人的連鎖信都是假的！',actionTip:'直接刪掉，什麼事都不會發生！'},
+        {difficulty:2,category:'social',groupIcon:'📱',groupName:'同學聊天室',messages:[{sender:'同學',text:'看這個 5 秒短影片，那個男生推人！大家去他影片下面罵他！'}],options:[{text:'太過分了，我去留言罵',isCorrect:false},{text:'告訴同學先看清楚再決定',isCorrect:true},{text:'跟著大家一起留言',isCorrect:false}],explanation:'5 秒太短，不知道前後發生什麼，跟著罵會變網路霸凌！',keyPoint:'短影片容易誤會，別急著罵！',actionTip:'先弄清楚整件事再說！'},
+        {difficulty:1,category:'social',groupIcon:'💬',groupName:'朋友群組',messages:[{sender:'同學',text:'這是魔法信！不在 10 分鐘內傳給 10 個人，你就會倒大楣！'}],options:[{text:'好可怕，趕快傳出去',isCorrect:false},{text:'這是嚇唬人的，直接刪除',isCorrect:true},{text:'怕怕的，傳給 5 個就好',isCorrect:false}],explanation:'「不傳會倒楣」全部都是嚇人的，不會發生壞事！',keyPoint:'嚇唬人的連鎖信都是假的！',actionTip:'直接刪掉，什麼事都不會發生！'},
         // 【修正4-b】原：「觸電、火災甚至死亡」→ 改為「被電到送醫院，甚至引發火災」
-        {difficulty:2,category:'social',groupIcon:'📱',groupName:'流行群',messages:[{sender:'網友',text:'最新挑戰！把硬幣插進插座，會有超炫的火花喔！'}],options:[{text:'好玩，馬上去客廳試',isCorrect:false},{text:'這超級危險！絕對不能學',isCorrect:true},{text:'先收藏影片晚點再看',isCorrect:false}],explanation:'插座是很危險的東西，這樣做會被電到送醫院，甚至引發火災，非常危險！',keyPoint:'網路的危險挑戰絕對不能學！',actionTip:'自己不學，也要阻止朋友！'},
+        {difficulty:2,category:'social',groupIcon:'📱',groupName:'流行群',messages:[{sender:'網友',text:'最新挑戰！把硬幣插進插座，會有超炫的火花喔！'}],options:[{text:'好玩，馬上去客廳試',isCorrect:false},{text:'這超級危險！絕對不能學',isCorrect:true},{text:'先收藏影片晚點再看',isCorrect:false}],explanation:'插座很危險，這樣做會被電到送醫院，非常危險！',keyPoint:'網路的危險挑戰絕對不能學！',actionTip:'自己不學，也要阻止朋友！'},
         // 【social 新增1】截圖謠言：同學被說做壞事
-        {difficulty:2,category:'social',groupIcon:'📸',groupName:'班級聊天室',messages:[{sender:'同學C',text:'我截圖到一個訊息說班上某某同學在外面欺負小朋友，大家快傳！'}],options:[{text:'馬上截圖傳給其他同學看',isCorrect:false},{text:'只有截圖沒有證據，不要亂傳',isCorrect:true},{text:'去問那個同學是不是真的再說',isCorrect:false}],explanation:'一張截圖很容易被偽造，亂傳會傷害同學，變成網路霸凌的幫手！',keyPoint:'截圖不等於真相，別當謠言幫手！',actionTip:'不傳、不讚、不轉分享！'},
+        {difficulty:2,category:'social',groupIcon:'📸',groupName:'班級聊天室',messages:[{sender:'同學C',text:'我截圖到一個訊息說班上某某同學在外面欺負小朋友，大家快傳！'}],options:[{text:'馬上截圖傳給其他同學看',isCorrect:false},{text:'只有截圖沒有證據，不要亂傳',isCorrect:true},{text:'去問那個同學是不是真的再說',isCorrect:false}],explanation:'截圖容易被偽造，亂傳會傷害同學，變成霸凌幫手！',keyPoint:'截圖不等於真相，別當謠言幫手！',actionTip:'不傳、不讚、不轉分享！'},
         // 【social 新增2】假好康分享：LINE 分享抽獎
-        {difficulty:1,category:'social',groupIcon:'💬',groupName:'同學群組',messages:[{sender:'同學D',text:'快！分享這個連結給 5 個好友就能抽到 Switch！我剛分享完等你一起！'}],options:[{text:'好快分享，一起抽！',isCorrect:false},{text:'這是假的，分享也不會有獎品',isCorrect:true},{text:'先分享看看，反正沒損失',isCorrect:false}],explanation:'「分享給朋友就送獎品」是常見騙術，分享後只會讓更多人被騙！',keyPoint:'要分享才能得獎的都是假的！',actionTip:'告訴同學這是假的，不要分享！'},
+        {difficulty:1,category:'social',groupIcon:'💬',groupName:'同學群組',messages:[{sender:'同學D',text:'快！分享這個連結給 5 個好友就能抽到 Switch！我剛分享完等你一起！'}],options:[{text:'好快分享，一起抽！',isCorrect:false},{text:'這是假的，分享也不會有獎品',isCorrect:true},{text:'先分享看看，反正沒損失',isCorrect:false}],explanation:'「分享就送獎品」是常見騙術，分享只會讓更多人被騙！',keyPoint:'要分享才能得獎的都是假的！',actionTip:'告訴同學這是假的，不要分享！'},
         // 【social 新增3】個資留言陷阱
         {difficulty:2,category:'social',groupIcon:'📱',groupName:'班級群組',messages:[{sender:'陌生帳號',text:'同學們好！請在這裡留言你的名字和就讀學校，讓我們認識彼此！'}],options:[{text:'好啊，留下名字和學校',isCorrect:false},{text:'陌生帳號要個資，不要回答',isCorrect:true},{text:'只留名字應該沒關係吧',isCorrect:false}],explanation:'陌生人收集名字和學校資料，可能是壞人想找到你！',keyPoint:'不認識的人不給個人資料！',actionTip:'告訴爸媽這個奇怪帳號！'},
 
@@ -2130,11 +2119,11 @@ window.AppGame2 = {
         {difficulty:2,category:'news',groupIcon:'📷',groupName:'家族群',messages:[{sender:'阿姨',text:'有人傳一張橋斷掉的照片，但最近沒聽說有地震耶？'}],options:[{text:'有照片就是真的，趕快傳',isCorrect:false},{text:'這可能是很久以前或別國的舊照片',isCorrect:true},{text:'反正不確定，傳給好朋友看',isCorrect:false}],explanation:'有人會拿舊照片騙人說是現在發生的事，要看清楚！',keyPoint:'看照片要看是不是最近的！',actionTip:'告訴阿姨可能是舊照片，先別傳！'},
         {difficulty:1,category:'news',groupIcon:'📺',groupName:'新聞群',messages:[{sender:'同學',text:'有人傳新聞截圖說明天會下大雪，台灣會結冰！'}],options:[{text:'趕快買十件外套準備',isCorrect:false},{text:'去氣象局 APP 看天氣最準',isCorrect:true},{text:'轉傳到家族群問大家',isCorrect:false}],explanation:'新聞截圖很容易被改字騙人，天氣要看氣象局！',keyPoint:'天氣消息看氣象局最準！',actionTip:'打開氣象局 APP 確認天氣！'},
         // 【news 新增1】假新聞標題：誇張食物謠言
-        {difficulty:1,category:'news',groupIcon:'📰',groupName:'家族群',messages:[{sender:'阿公',text:'看這個新聞標題！說：「科學家發現吃巧克力可以變聰明！吃越多越好！」'}],options:[{text:'哇真的嗎！快去買巧克力',isCorrect:false},{text:'這種說法太誇張，要去找正式醫學報告查',isCorrect:true},{text:'轉傳給同學一起吃',isCorrect:false}],explanation:'誇張又太好聽的新聞標題，通常是假的！真正的健康資訊要看醫生或政府機構說的！',keyPoint:'太誇張的標題先不要相信！',actionTip:'告訴阿公要找正式醫學資料確認！'},
+        {difficulty:1,category:'news',groupIcon:'📰',groupName:'家族群',messages:[{sender:'阿公',text:'看這個新聞標題！說：「科學家發現吃巧克力可以變聰明！吃越多越好！」'}],options:[{text:'哇真的嗎！快去買巧克力',isCorrect:false},{text:'這種說法太誇張，要去找正式醫學報告查',isCorrect:true},{text:'轉傳給同學一起吃',isCorrect:false}],explanation:'太誇張又太好聽的標題通常是假的！要看醫生或政府說的才準！',keyPoint:'太誇張的標題先不要相信！',actionTip:'告訴阿公要找正式醫學資料確認！'},
         // 【news 新增2】網路謠言：AI 產生的假照片
-        {difficulty:2,category:'news',groupIcon:'🤖',groupName:'同學群組',messages:[{sender:'同學E',text:'看！這張照片說是今天台灣發生的大事，但感覺照片有點怪怪的⋯'}],options:[{text:'有照片就是真的，馬上傳',isCorrect:false},{text:'照片怪怪的可能是 AI 做的假照片，先查查看',isCorrect:true},{text:'傳給爸媽問他們知不知道',isCorrect:false}],explanation:'現在有 AI 可以做出很逼真的假照片，覺得怪怪的要去可信任的新聞網站確認！',keyPoint:'AI 假照片越來越多，要會辨別！',actionTip:'去大電視台官網查有沒有這條新聞！'},
+        {difficulty:2,category:'news',groupIcon:'🤖',groupName:'同學群組',messages:[{sender:'同學E',text:'看！這張照片說是今天台灣發生的大事，但感覺照片有點怪怪的⋯'}],options:[{text:'有照片就是真的，馬上傳',isCorrect:false},{text:'照片怪怪的可能是 AI 做的假照片，先查查看',isCorrect:true},{text:'傳給爸媽問他們知不知道',isCorrect:false}],explanation:'現在 AI 可以做出很逼真的假照片，怪怪的要去新聞網站確認！',keyPoint:'AI 假照片越來越多，要會辨別！',actionTip:'去大電視台官網查有沒有這條新聞！'},
         // 【news 新增3】查核資源：知道去哪裡查
-        {difficulty:1,category:'news',groupIcon:'🔍',groupName:'家庭群',messages:[{sender:'媽媽',text:'有人說最近有個很可怕的新病毒在流行，傳得很誇張，不知道是真的嗎？'}],options:[{text:'這麼多人說一定是真的，趕快準備',isCorrect:false},{text:'去衛生福利部官網或疾管署查最準',isCorrect:true},{text:'先轉傳讓大家知道',isCorrect:false}],explanation:'健康和疾病的消息，要去政府的衛生福利部或疾管署官網查，才不會被假消息嚇到！',keyPoint:'健康消息去官方網站查！',actionTip:'幫媽媽一起去衛生福利部官網確認！'},
+        {difficulty:1,category:'news',groupIcon:'🔍',groupName:'家庭群',messages:[{sender:'媽媽',text:'有人說最近有個很可怕的新病毒在流行，傳得很誇張，不知道是真的嗎？'}],options:[{text:'這麼多人說一定是真的，趕快準備',isCorrect:false},{text:'去衛生福利部官網或疾管署查最準',isCorrect:true},{text:'先轉傳讓大家知道',isCorrect:false}],explanation:'健康消息要去衛生福利部或疾管署官網查，才不會被嚇到！',keyPoint:'健康消息去官方網站查！',actionTip:'幫媽媽一起去衛生福利部官網確認！'},
 
         // 學校補充 (3題)
         {difficulty:1,category:'school',groupIcon:'🏫',groupName:'班級群組',messages:[{sender:'同學小花',text:'我聽說下週的校外教學去動物園，大家帶零食去吧！'}],options:[{text:'好耶，我帶一大包零食去',isCorrect:false},{text:'等學校發正式通知單再說',isCorrect:true},{text:'問問其他同學是不是真的',isCorrect:false}],explanation:'校外教學的目的地要等學校的正式通知單！',keyPoint:'聽說的消息要等正式通知！',actionTip:'等老師發通知單再決定！'},
@@ -2148,7 +2137,7 @@ window.AppGame2 = {
 
         // 遊戲/網路補充 (2題)
         {difficulty:2,category:'game',groupIcon:'🎮',groupName:'遊戲群',messages:[{sender:'網路玩家',text:'我可以教你怎麼讓遊戲角色變無敵，但你要先加我LINE！'}],options:[{text:'馬上加他LINE！',isCorrect:false},{text:'不要，加陌生人LINE很危險',isCorrect:true},{text:'先加看看，不對再刪除',isCorrect:false}],explanation:'不認識的人要你加LINE，可能是壞人！',keyPoint:'不認識的人不要隨便加LINE！',actionTip:'拒絕他並告訴爸媽！'},
-        {difficulty:2,category:'game',groupIcon:'📱',groupName:'網路訊息',messages:[{sender:'陌生帳號',text:'你今天是我們的第 100 萬個訪客！點這裡領取神秘大獎！'}],options:[{text:'好幸運！馬上點擊領獎！',isCorrect:false},{text:'這是假的，直接關掉',isCorrect:true},{text:'先看看是什麼獎再決定',isCorrect:false}],explanation:'「第 100 萬個訪客」是騙人的假中獎，點了會有問題！',keyPoint:'莫名其妙的中獎通知都是假的！',actionTip:'直接關掉，告訴爸媽！'},
+        {difficulty:2,category:'game',groupIcon:'📱',groupName:'網路訊息',messages:[{sender:'陌生帳號',text:'你今天是我們的第 100 萬個訪客！點這裡領取神秘大獎！'}],options:[{text:'好幸運！馬上點擊領獎！',isCorrect:false},{text:'這是假的，直接關掉',isCorrect:true},{text:'先看看是什麼獎再決定',isCorrect:false}],explanation:'「第 100 萬訪客中獎」是騙人的，點了才真的有問題！',keyPoint:'莫名其妙的中獎通知都是假的！',actionTip:'直接關掉，告訴爸媽！'},
     ],
 
     currentQuestions:[],currentIndex:0,score:0,wrongQuestions:[],
